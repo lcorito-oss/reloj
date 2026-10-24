@@ -15,6 +15,8 @@ svg{width:min(92vw,78vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-
 .ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
 text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--txt);text-anchor:middle}
 text.on{font-weight:700}
+#rDay text,#rMon text,#rWk text{opacity:.35;filter:blur(.35px);transition:opacity .6s}
+#rDay text.on,#rMon text.on,#rWk text.on{opacity:1;filter:none}
 .data,.live,.intro,.avatar{transition:opacity .8s}
 .data,.live{opacity:0}
 svg.go .data,svg.go .live{opacity:1}

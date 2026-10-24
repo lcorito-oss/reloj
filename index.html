@@ -22,7 +22,7 @@ html,body{height:100%}
 body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 h1{font-family:'Poppins','Segoe UI',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,5vw,2.2rem);letter-spacing:1px}
 svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .25s ease-out}
-#info{font:14px/1.2 'Segoe UI',sans-serif;color:#aaa;letter-spacing:.5px;text-align:center;min-height:1em}
+#info{font:600 15px/1.2 'Segoe UI',sans-serif;color:#aaa;letter-spacing:.5px;text-align:center;min-height:1em}
 #tools{display:flex;gap:10px;opacity:0;transition:opacity .3s}
 #tools:hover,#tools:focus-within{opacity:1}
 #tools button{padding:6px 11px;font-size:15px;border-radius:50%;opacity:.7;line-height:1}
@@ -202,7 +202,16 @@ let hover=false, posMode=true, resetT;
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let ac,soundOn=false,lastS=-1,wl=null,themeIdx=0;
 const info=document.getElementById('info');
-function updateText(){const d=new Date();let s=d.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})+' · '+d.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});s=s.charAt(0).toUpperCase()+s.slice(1);info.textContent=s;svg.setAttribute('aria-label',s);}
+function updateText(){
+  const d=new Date(), P={};
+  new Intl.DateTimeFormat('es',{weekday:'long',day:'numeric',month:'long'}).formatToParts(d).forEach(p=>{P[p.type]=p.value;});
+  const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+  const time=d.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
+  const parts=[[cap(P.weekday),'var(--wk)'],[' ',''],[P.day,'var(--day)'],[' de ',''],[P.month,'var(--mon)'],[' · ',''],[time,'var(--glow)']];
+  info.textContent='';
+  parts.forEach(([t,c])=>{const s=document.createElement('span');s.textContent=t;if(c)s.style.color=c;info.appendChild(s);});
+  svg.setAttribute('aria-label',info.textContent);
+}
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES=[{d:'#ff3b5c',m:'#4da3ff',w:'#3ddc84',g:'#3ddc84'},{d:'#ff7a1a',m:'#ffd166',w:'#ff4d6d',g:'#ffb347'},{d:'#ff7ad9',m:'#7b9cff',w:'#c77dff',g:'#c77dff'},{d:'#ff6b6b',m:'#2ec4b6',w:'#9bf6ff',g:'#2ec4b6'}];
 try{themeIdx=(+localStorage.getItem('relojTheme')||0)%THEMES.length;}catch(e){}

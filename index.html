@@ -4,24 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Clock Modern Way</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2b2b2b">
-<link rel="icon" type="image/svg+xml" href="icon.svg">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Reloj">
-<meta property="og:title" content="Clock Modern Way">
-<meta property="og:image" content="icon-512.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#2b2b2b;--band:#1b1b1b;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84}
+:root{color-scheme:dark;--bg:#2b2b2b;--band:#1b1b1b;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#3ddc84}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 h1{font-family:'Poppins','Segoe UI',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,5vw,2.2rem);letter-spacing:1px}
-svg{width:min(92vw,78vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .25s ease-out}
+#info{font:14px/1.2 'Segoe UI',sans-serif;color:#aaa;letter-spacing:.5px;text-align:center;min-height:1em}
+#tools{display:flex;gap:10px}
+#tools button{padding:6px 11px;font-size:15px;border-radius:50%;opacity:.7;line-height:1}
+#tools button:hover{opacity:1}
+#glow feFlood,#bglow feFlood{flood-color:var(--glow)}
+@media (prefers-reduced-motion:reduce){.ring{transition:none}}
 .ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
 text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--txt);text-anchor:middle}
 text.on{font-weight:700}
@@ -57,13 +53,13 @@ button:hover{border-color:#888;color:#fff}
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
-      <feFlood flood-color="#3ddc84" flood-opacity=".6"/>
+      <feFlood flood-opacity=".6"/>
       <feComposite in2="b" operator="in" result="g"/>
       <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <filter id="bglow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
       <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/>
-      <feFlood flood-color="#3ddc84" flood-opacity=".45"/>
+      <feFlood flood-opacity=".45"/>
       <feComposite in2="b" operator="in" result="g"/>
       <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
@@ -115,9 +111,15 @@ button:hover{border-color:#888;color:#fff}
     <circle cx="200" cy="200" r="4" fill="#fff"/>
   </g>
 </svg>
+<div id="info"></div>
+<div id="tools">
+  <button id="bTheme" type="button" title="Cambiar colores" aria-label="Cambiar colores">🎨</button>
+  <button id="bSound" type="button" title="Sonido tic-tac" aria-label="Sonido tic-tac">🔇</button>
+  <button id="bFull" type="button" title="Pantalla completa y pantalla encendida" aria-label="Pantalla completa">⛶</button>
+</div>
 <script>
 const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
-const days=Array.from({length:31},(_,i)=>String(i+1));
+let dim=0;
 const months=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const wk=['DOM','LUN','MAR','MIE','JUE','VIE','SAB'];
 
@@ -132,7 +134,7 @@ function txt(g,t,r,size,angle,color){
 function build(id,data,r,size,color){
   data.forEach((t,i)=>txt(document.getElementById(id),t,r,size,i*360/data.length,color));
 }
-build('rDay',days,178,10,'var(--day)');
+function buildDays(n){document.getElementById('rDay').innerHTML='';build('rDay',Array.from({length:n},(_,i)=>String(i+1)),178,10,'var(--day)');dim=n;}
 build('rMon',months,138,11,'var(--mon)');
 build('rWk',wk,100,10,'var(--wk)');
 
@@ -156,7 +158,9 @@ function rot(id,idx,n){document.getElementById(id).style.transform=`rotate(${-id
 
 function setCalendar(){
   const d=new Date(), day=d.getDate()-1, m=d.getMonth(), w=d.getDay();
-  band('aS',178,day*360/31,360/31);band('aM',138,m*30,30);band('aH',100,w*360/7,360/7);
+  const n=new Date(d.getFullYear(),m+1,0).getDate();
+  if(n!==dim)buildDays(n);
+  band('aS',178,day*360/n,360/n);band('aM',138,m*30,30);band('aH',100,w*360/7,360/7);
   mark('rDay',day);mark('rMon',m);mark('rWk',w);
 }
 // banda gris: arco de 180° que termina en el ángulo de la manecilla
@@ -166,16 +170,42 @@ function band(id,r,deg,span){
   e.setAttribute('transform',`rotate(${deg-span/2-90} 200 200)`);
 }
 function tick(){
-  const d=new Date(), s=d.getSeconds()+d.getMilliseconds()/1000,
+  const d=new Date(), sec=d.getSeconds(), s=RM?sec:sec+d.getMilliseconds()/1000,
         m=d.getMinutes()+s/60, h=(d.getHours()%12)+m/60;
+  if(sec!==lastS){lastS=sec;if(soundOn)tickSound();}
   const set=(id,a)=>document.getElementById(id).setAttribute('transform',`rotate(${a} 200 200)`);
   set('hS',s*6);set('hM',m*6);set('hH',h*30);
-  set('spin',(Date.now()/1000*6)%360);
+  if(!RM)set('spin',(Date.now()/1000*6)%360);
   requestAnimationFrame(tick);
 }
 let hover=false, posMode=true, resetT;
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ac,soundOn=false,lastS=-1,wl=null,themeIdx=0;
+const info=document.getElementById('info');
+function updateText(){const d=new Date();let s=d.toLocaleDateString('es',{weekday:'long',day:'numeric',month:'long'})+' · '+d.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});s=s.charAt(0).toUpperCase()+s.slice(1);info.textContent=s;svg.setAttribute('aria-label',s);}
+function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
+const THEMES=[{d:'#ff3b5c',m:'#4da3ff',w:'#3ddc84',g:'#3ddc84'},{d:'#ff7a1a',m:'#ffd166',w:'#ff4d6d',g:'#ffb347'},{d:'#ff7ad9',m:'#7b9cff',w:'#c77dff',g:'#c77dff'},{d:'#ff6b6b',m:'#2ec4b6',w:'#9bf6ff',g:'#2ec4b6'}];
+try{themeIdx=(+localStorage.getItem('relojTheme')||0)%THEMES.length;}catch(e){}
+function applyTheme(i){const t=THEMES[i],s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);try{localStorage.setItem('relojTheme',i);}catch(e){}}
+document.getElementById('bTheme').addEventListener('click',()=>{themeIdx=(themeIdx+1)%THEMES.length;applyTheme(themeIdx);});
+const bS=document.getElementById('bSound');
+bS.addEventListener('click',()=>{soundOn=!soundOn;if(soundOn&&!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac&&ac.state==='suspended')ac.resume();bS.textContent=soundOn?'🔊':'🔇';});
+const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;
+if(!canFull&&!canWake)bF.style.display='none';
+async function wake(on){try{if(on&&canWake&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null;});}else if(!on&&wl){await wl.release();wl=null;}}catch(e){}}
+bF.addEventListener('click',async()=>{
+  const on=bF.dataset.on!=='1';bF.dataset.on=on?'1':'0';
+  try{if(canFull){if(on)await document.documentElement.requestFullscreen();else if(document.fullscreenElement)await document.exitFullscreen();}}catch(e){}
+  wake(on);
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&bF.dataset.on==='1')wake(true);});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&bF.dataset.on==='1'){bF.dataset.on='0';wake(false);}});
+if(!RM){
+  document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;svg.style.transform=`perspective(900px) rotateY(${x*12}deg) rotateX(${-y*12}deg)`;});
+  document.documentElement.addEventListener('pointerleave',()=>{svg.style.transform='';});
+}
 const IDS=['gD','gM','gW'];
-function targets(){const d=new Date();return {gD:(d.getDate()-1)*360/31,gM:d.getMonth()*30,gW:d.getDay()*360/7};}
+function targets(){const d=new Date();return {gD:(d.getDate()-1)*360/dim,gM:d.getMonth()*30,gW:d.getDay()*360/7};}
 function hoverOn(){
   hover=true;clearTimeout(resetT);const t=targets();
   IDS.forEach(id=>{const g=document.getElementById(id);g.classList.add('lit');g.style.transform=`rotate(${posMode?t[id]:360}deg)`;});
@@ -203,9 +233,8 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-setCalendar();setInterval(setCalendar,30000);tick();play();
+applyTheme(themeIdx);setCalendar();updateText();setInterval(setCalendar,30000);setInterval(updateText,1000);tick();play();
 svg.addEventListener('click',play);
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>

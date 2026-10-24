@@ -19,6 +19,8 @@ text.on{font-weight:700}
 .data,.live{opacity:0}
 svg.go .data,svg.go .live{opacity:1}
 svg.go .intro,svg.go .avatar{opacity:0}
+#aS,#aM,#aH{opacity:0;transition:opacity .8s}
+svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 .intro text,#spin text{fill:#a9a9a9;font-weight:600}
 #spin text{font-family:'Pirata One','Metal Mania',serif;font-weight:400;font-size:14px;fill:#c9c9c9}
 .nums text{fill:#ccc;font-weight:600;font-size:9px}
@@ -174,22 +176,23 @@ function hoverOff(){
   hover=false;clearTimeout(resetT);
   IDS.forEach(id=>{const g=document.getElementById(id);g.classList.remove('lit');g.style.transition='';g.style.transform='rotate(0deg)';});
 }
+let seqT=[];
+function later(fn,ms){seqT.push(setTimeout(fn,ms));}
 function play(){
-  svg.classList.remove('go');
-  if(hover)hoverOn();
-  setTimeout(()=>{const h=hover;hoverOff();hover=h;setCalendar();svg.classList.add('go');},3500);
+  seqT.forEach(clearTimeout);seqT=[];
+  svg.classList.remove('go','bD','bM','bW');
+  IDS.forEach(id=>{const g=document.getElementById(id);g.classList.remove('lit');g.style.transition='none';g.style.transform='rotate(0deg)';void g.getBoundingClientRect();g.style.transition='';});
+  const t=targets();
+  const step=(id,cls,at)=>{
+    later(()=>{const g=document.getElementById(id);g.classList.add('lit');g.style.transform=`rotate(${t[id]+360}deg)`;},at);
+    later(()=>svg.classList.add(cls),at+900);
+  };
+  step('gD','bD',800);step('gM','bM',2400);step('gW','bW',4000);
+  later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
 setCalendar();setInterval(setCalendar,30000);tick();play();
-let ptype='mouse';
-svg.addEventListener('pointerdown',e=>{ptype=e.pointerType;});
-svg.addEventListener('click',()=>{
-  if(ptype==='mouse'){play();return;}
-  if(svg.classList.contains('go')){hover=true;play();}
-  else if(hover)hoverOff();else hoverOn();
-});
-svg.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse')return;if(!svg.classList.contains('go'))hoverOn();else hover=true;});
-svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hoverOff();});
+svg.addEventListener('click',play);
 </script>
 </body>
 </html>

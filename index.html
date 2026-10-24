@@ -16,7 +16,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
 <style>
-:root{color-scheme:dark;--bg:#000;--band:#1a1a1a;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#3ddc84}
+:root{color-scheme:dark;--bg:#000;--band:#000;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#3ddc84}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
 body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
@@ -27,6 +27,10 @@ svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-
 #tools:hover,#tools:focus-within{opacity:1}
 #tools button{padding:6px 11px;font-size:15px;border-radius:50%;opacity:.7;line-height:1}
 #tools button:hover{opacity:1}
+#tools.edit{opacity:1}
+#txt{display:none;background:#111;color:#eee;border:1px solid #444;border-radius:16px;padding:6px 12px;font:14px 'Segoe UI',sans-serif;width:150px;outline:none}
+#tools.edit #txt{display:block}
+#txt:focus{border-color:var(--glow)}
 #glow feFlood,#bglow feFlood{flood-color:var(--glow)}
 @media (prefers-reduced-motion:reduce){.ring{transition:none}}
 .ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
@@ -123,6 +127,8 @@ button:hover{border-color:#888;color:#fff}
   <button id="bTheme" type="button" title="Cambiar colores" aria-label="Cambiar colores">🎨</button>
   <button id="bSound" type="button" title="Sonido tic-tac" aria-label="Sonido tic-tac">🔇</button>
   <button id="bFull" type="button" title="Pantalla completa y pantalla encendida" aria-label="Pantalla completa">⛶</button>
+  <button id="bText" type="button" title="Escribir tu propio texto" aria-label="Escribir tu propio texto">✏️</button>
+  <input id="txt" type="text" maxlength="24" placeholder="Tu texto" aria-label="Texto que gira" autocomplete="off">
 </div>
 <script>
 const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
@@ -153,7 +159,9 @@ function label(word,r,size,sp,gid='intro'){
 label('DÍA',178,11,20,'gD');
 label('MES',138,11,18,'gM');
 label('DÍA SEMANA',100,10,12,'gW');
-label('HELL-OW',64,14,12,'spin');
+let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
+function setSpinText(t){document.getElementById('spin').innerHTML='';label(t,64,14,Math.min(12,2*Math.PI*64/(t.length+1)),'spin');}
+setSpinText(spinText);
 
 function mark(id,idx){
   [...document.getElementById(id).children].forEach((el,i)=>{
@@ -194,6 +202,14 @@ function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain
 const THEMES=[{d:'#ff3b5c',m:'#4da3ff',w:'#3ddc84',g:'#3ddc84'},{d:'#ff7a1a',m:'#ffd166',w:'#ff4d6d',g:'#ffb347'},{d:'#ff7ad9',m:'#7b9cff',w:'#c77dff',g:'#c77dff'},{d:'#ff6b6b',m:'#2ec4b6',w:'#9bf6ff',g:'#2ec4b6'}];
 try{themeIdx=(+localStorage.getItem('relojTheme')||0)%THEMES.length;}catch(e){}
 function applyTheme(i){const t=THEMES[i],s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);try{localStorage.setItem('relojTheme',i);}catch(e){}}
+const tools=document.getElementById('tools'), tin=document.getElementById('txt');
+document.getElementById('bText').addEventListener('click',()=>{
+  const on=tools.classList.toggle('edit');
+  if(on){tin.value=spinText;tin.focus();tin.select();}
+});
+function applyText(){const t=tin.value.trim().slice(0,24)||'HELL-OW';spinText=t;setSpinText(t);try{localStorage.setItem('relojText',t);}catch(e){}}
+tin.addEventListener('input',applyText);
+tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){tools.classList.remove('edit');tin.blur();}});
 document.getElementById('bTheme').addEventListener('click',()=>{themeIdx=(themeIdx+1)%THEMES.length;applyTheme(themeIdx);});
 const bS=document.getElementById('bSound');
 bS.addEventListener('click',()=>{soundOn=!soundOn;if(soundOn&&!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac&&ac.state==='suspended')ac.resume();bS.textContent=soundOn?'🔊':'🔇';});

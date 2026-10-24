@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clock Modern Way</title>
+<link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#2b2b2b;--band:#1b1b1b;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+h1{font-family:'Poppins','Segoe UI',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,5vw,2.2rem);letter-spacing:1px}
+svg{width:min(92vw,78vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--txt);text-anchor:middle}
+text.on{font-weight:700}
+.data,.live,.intro,.avatar{transition:opacity .8s}
+.data,.live{opacity:0}
+svg.go .data,svg.go .live{opacity:1}
+svg.go .intro,svg.go .avatar{opacity:0}
+.intro text,#spin text{fill:#a9a9a9;font-weight:600}
+#spin text{font-family:'Pirata One','Metal Mania',serif;font-weight:400;font-size:14px;fill:#c9c9c9}
+.nums text{fill:#ccc;font-weight:600;font-size:9px}
+.nums text:nth-child(2){fill:var(--day)}
+.nums text:nth-child(3){fill:var(--mon)}
+.nums text:nth-child(4){fill:var(--wk)}
+#intro text{transition:fill .6s,opacity .6s}
+#gD text{fill:var(--day)}
+#gM text{fill:var(--mon)}
+#gW text{fill:var(--wk)}
+#gD text,#gM text,#gW text{opacity:.7}
+#intro .lit text{opacity:1}
+#gD.lit text{fill:var(--day);font-weight:700}
+#gM.lit text{fill:var(--mon);font-weight:700}
+#gW.lit text{fill:var(--wk);font-weight:700}
+button{background:#1b1b1b;color:#bbb;border:1px solid #444;border-radius:20px;padding:8px 18px;font:13px 'Segoe UI',sans-serif;cursor:pointer}
+button:hover{border-color:#888;color:#fff}
+</style>
+</head>
+<body>
+<svg id="clock" viewBox="0 0 400 400" aria-label="Reloj (clic para repetir la presentación)">
+  <defs>
+    <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
+      <feFlood flood-color="#3ddc84" flood-opacity=".6"/>
+      <feComposite in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bglow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b"/>
+      <feFlood flood-color="#3ddc84" flood-opacity=".45"/>
+      <feComposite in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="200" cy="200" r="196" fill="#222"/>
+  <g fill="none" stroke="var(--band)" stroke-width="28">
+    <circle cx="200" cy="200" r="178"/><circle cx="200" cy="200" r="138"/>
+    <circle cx="200" cy="200" r="100"/><circle cx="200" cy="200" r="64" stroke-width="24"/>
+  </g>
+  <!-- bandas grises: segundos / minutos / horas -->
+  <g fill="none" stroke="var(--arc)" stroke-width="28" filter="url(#bglow)">
+    <circle id="aS" cx="200" cy="200" r="178"/>
+    <circle id="aM" cx="200" cy="200" r="138"/>
+    <circle id="aH" cx="200" cy="200" r="100"/>
+  </g>
+  <!-- rótulos de presentación -->
+  <g class="intro" id="intro">
+    <g id="gD" class="ring" style="transform-origin:200px 200px"></g>
+    <g id="gM" class="ring" style="transform-origin:200px 200px"></g>
+    <g id="gW" class="ring" style="transform-origin:200px 200px"></g>
+  </g>
+  <!-- Hell-OW girando -->
+  <g id="spin"></g>
+  <!-- datos del calendario -->
+  <g class="data">
+    <g id="rDay" class="ring" style="transform-origin:200px 200px"></g>
+    <g id="rMon" class="ring" style="transform-origin:200px 200px"></g>
+    <g id="rWk" class="ring" style="transform-origin:200px 200px"></g>
+  </g>
+  <circle cx="200" cy="200" r="50" fill="#151515" stroke="#444" stroke-width="2"/>
+  <!-- búho vectorial -->
+  <g class="avatar">
+    <circle cx="200" cy="200" r="41" fill="#3a0000"/>
+    <g transform="translate(200 200) scale(.46) translate(-50 -75)">
+      <path fill="#c35200" d="M8 1C4 10 2 20 4 30C-1 42-1 56 3 66C6 74 10 78 14 82C8 105 12 135 28 148C40 153 60 153 72 148C88 135 92 105 86 82C90 78 94 74 97 66C101 56 101 42 96 30C98 20 96 10 92 1L78 14C65 6 35 6 22 14Z"/>
+      <path fill="#3a0000" d="M11 28C25 36 40 44 47 58C38 46 24 38 11 28ZM89 28C75 36 60 44 53 58C62 46 76 38 89 28ZM27 82C36 95 32 125 23 146C26 125 26 100 27 82ZM73 82C64 95 68 125 77 146C74 125 74 100 73 82Z"/>
+    </g>
+  </g>
+  <!-- números 12, 3, 6 y 9 -->
+  <g class="live nums" filter="url(#glow)">
+    <text x="200" y="163">12</text><text x="240" y="203">3</text>
+    <text x="200" y="243">6</text><text x="160" y="203">9</text>
+  </g>
+  <!-- manecillas -->
+  <g class="live">
+    <line id="hH" filter="url(#glow)" x1="200" y1="200" x2="200" y2="174" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <line id="hM" filter="url(#glow)" x1="200" y1="200" x2="200" y2="166" stroke="#ddd" stroke-width="3.5" stroke-linecap="round"/>
+    <line id="hS" filter="url(#glow)" x1="200" y1="210" x2="200" y2="156" stroke="#ff3366" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="200" cy="200" r="4" fill="#fff"/>
+  </g>
+</svg>
+<script>
+const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
+const days=Array.from({length:31},(_,i)=>String(i+1));
+const months=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const wk=['DOM','LUN','MAR','MIE','JUE','VIE','SAB'];
+
+function txt(g,t,r,size,angle,color){
+  const el=document.createElementNS(NS,'text');
+  el.textContent=t;el.setAttribute('x',200);el.setAttribute('y',200-r+4);
+  el.setAttribute('font-size',size);
+  el.setAttribute('transform',`rotate(${angle} 200 200)`);
+  if(color)el.dataset.c=color;
+  g.appendChild(el);
+}
+function build(id,data,r,size,color){
+  data.forEach((t,i)=>txt(document.getElementById(id),t,r,size,i*360/data.length,color));
+}
+build('rDay',days,178,10,'var(--day)');
+build('rMon',months,138,11,'var(--mon)');
+build('rWk',wk,100,10,'var(--wk)');
+
+// presentación: letras separadas sobre el arco superior
+function label(word,r,size,sp,gid='intro'){
+  const g=document.getElementById(gid), n=word.length, step=sp/r*180/Math.PI;
+  [...word].forEach((c,i)=>{ if(c!==' ')txt(g,c,r,size,(i-(n-1)/2)*step); });
+}
+label('DÍA',178,11,20,'gD');
+label('MES',138,11,18,'gM');
+label('DÍA SEMANA',100,10,12,'gW');
+label('HELL-OW',64,14,12,'spin');
+
+function mark(id,idx){
+  [...document.getElementById(id).children].forEach((el,i)=>{
+    el.classList.toggle('on',i===idx);
+    el.style.fill=i===idx?el.dataset.c:'';
+  });
+}
+function rot(id,idx,n){document.getElementById(id).style.transform=`rotate(${-idx*360/n}deg)`;}
+
+function setCalendar(){
+  const d=new Date(), day=d.getDate()-1, m=d.getMonth(), w=d.getDay();
+  band('aS',178,day*360/31,360/31);band('aM',138,m*30,30);band('aH',100,w*360/7,360/7);
+  mark('rDay',day);mark('rMon',m);mark('rWk',w);
+}
+// banda gris: arco de 180° que termina en el ángulo de la manecilla
+function band(id,r,deg,span){
+  const c=2*Math.PI*r, e=document.getElementById(id);
+  e.setAttribute('stroke-dasharray',`${c*span/360} ${c}`);
+  e.setAttribute('transform',`rotate(${deg-span/2-90} 200 200)`);
+}
+function tick(){
+  const d=new Date(), s=d.getSeconds()+d.getMilliseconds()/1000,
+        m=d.getMinutes()+s/60, h=(d.getHours()%12)+m/60;
+  const set=(id,a)=>document.getElementById(id).setAttribute('transform',`rotate(${a} 200 200)`);
+  set('hS',s*6);set('hM',m*6);set('hH',h*30);
+  set('spin',(Date.now()/1000*6)%360);
+  requestAnimationFrame(tick);
+}
+let hover=false, posMode=true, resetT;
+const IDS=['gD','gM','gW'];
+function targets(){const d=new Date();return {gD:(d.getDate()-1)*360/31,gM:d.getMonth()*30,gW:d.getDay()*360/7};}
+function hoverOn(){
+  hover=true;clearTimeout(resetT);const t=targets();
+  IDS.forEach(id=>{const g=document.getElementById(id);g.classList.add('lit');g.style.transform=`rotate(${posMode?t[id]:360}deg)`;});
+  if(!posMode)resetT=setTimeout(()=>IDS.forEach(id=>{
+    const g=document.getElementById(id);g.style.transition='none';g.style.transform='rotate(0deg)';
+    void g.getBoundingClientRect();g.style.transition='';
+  }),1300);
+}
+function hoverOff(){
+  hover=false;clearTimeout(resetT);
+  IDS.forEach(id=>{const g=document.getElementById(id);g.classList.remove('lit');g.style.transition='';g.style.transform='rotate(0deg)';});
+}
+function play(){
+  svg.classList.remove('go');
+  if(hover)hoverOn();
+  setTimeout(()=>{const h=hover;hoverOff();hover=h;setCalendar();svg.classList.add('go');},3500);
+}
+
+setCalendar();setInterval(setCalendar,30000);tick();play();
+let ptype='mouse';
+svg.addEventListener('pointerdown',e=>{ptype=e.pointerType;});
+svg.addEventListener('click',()=>{
+  if(ptype==='mouse'){play();return;}
+  if(svg.classList.contains('go')){hover=true;play();}
+  else if(hover)hoverOff();else hoverOn();
+});
+svg.addEventListener('pointerenter',e=>{if(e.pointerType!=='mouse')return;if(!svg.classList.contains('go'))hoverOn();else hover=true;});
+svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hoverOff();});
+</script>
+</body>
+</html>

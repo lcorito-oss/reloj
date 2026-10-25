@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Clock Modern Way</title>
+<meta name="description" content="Reloj analógico interactivo con calendario circular, temas de color y modo sin conexión.">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -22,6 +23,7 @@ html,body{height:100%}
 body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 h1{font-family:'Poppins','Segoe UI',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,5vw,2.2rem);letter-spacing:1px}
 svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .25s ease-out}
+svg:focus-visible{outline:2px solid var(--glow);outline-offset:6px;border-radius:50%}
 #info{font:600 15px/1.2 'Segoe UI',sans-serif;color:#aaa;letter-spacing:.5px;text-align:center;min-height:1em}
 #tools{display:flex;gap:10px;opacity:0;transition:opacity .3s}
 #tools:hover,#tools:focus-within{opacity:1}
@@ -33,6 +35,8 @@ svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-
 #txt:focus{border-color:var(--glow)}
 #glow feFlood,#bglow feFlood{flood-color:var(--glow)}
 @media (prefers-reduced-motion:reduce){.ring{transition:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media (hover:none){#tools{opacity:1}}
 .ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
 text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--txt);text-anchor:middle;dominant-baseline:central}
 text.on{font-weight:700}
@@ -64,7 +68,7 @@ button:hover{border-color:#888;color:#fff}
 </style>
 </head>
 <body>
-<svg id="clock" viewBox="0 0 400 400" aria-label="Reloj (clic para repetir la presentación)">
+<svg id="clock" viewBox="0 0 400 400" role="button" tabindex="0" aria-label="Reloj interactivo. Activa para repetir la presentación.">
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
@@ -196,10 +200,12 @@ function tick(){
   const set=(id,a)=>document.getElementById(id).setAttribute('transform',`rotate(${a} 200 200)`);
   set('hS',s*6);set('hM',m*6);set('hH',h*30);
   if(!RM)set('spin',(Date.now()/1000*6)%360);
-  requestAnimationFrame(tick);
+  if(RM)setTimeout(tick,1000-(Date.now()%1000));
+  else requestAnimationFrame(tick);
 }
 let hover=false, posMode=true, resetT;
-const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const motionQuery=matchMedia('(prefers-reduced-motion: reduce)');
+let RM=motionQuery.matches;
 let ac,soundOn=false,lastS=-1,wl=null,themeIdx=0;
 const info=document.getElementById('info');
 function updateText(){
@@ -210,23 +216,27 @@ function updateText(){
   const parts=[[cap(P.weekday),'var(--wk)'],[' ',''],[P.day,'var(--day)'],[' de ',''],[P.month,'var(--mon)'],[' · ',''],[time,'var(--glow)']];
   info.textContent='';
   parts.forEach(([t,c])=>{const s=document.createElement('span');s.textContent=t;if(c)s.style.color=c;info.appendChild(s);});
-  svg.setAttribute('aria-label',info.textContent);
+  svg.setAttribute('aria-label',`${info.textContent}. Activa para repetir la presentación.`);
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES=[{d:'#ff3b5c',m:'#4da3ff',w:'#3ddc84',g:'#3ddc84'},{d:'#ff7a1a',m:'#ffd166',w:'#ff4d6d',g:'#ffb347'},{d:'#ff7ad9',m:'#7b9cff',w:'#c77dff',g:'#c77dff'},{d:'#ff6b6b',m:'#2ec4b6',w:'#9bf6ff',g:'#2ec4b6'}];
-try{themeIdx=(+localStorage.getItem('relojTheme')||0)%THEMES.length;}catch(e){}
+try{const savedTheme=Number(localStorage.getItem('relojTheme'));if(Number.isInteger(savedTheme)&&savedTheme>=0&&savedTheme<THEMES.length)themeIdx=savedTheme;}catch(e){}
 function applyTheme(i){const t=THEMES[i],s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);try{localStorage.setItem('relojTheme',i);}catch(e){}}
 const tools=document.getElementById('tools'), tin=document.getElementById('txt');
-document.getElementById('bText').addEventListener('click',()=>{
+const bText=document.getElementById('bText');
+bText.setAttribute('aria-expanded','false');
+bText.addEventListener('click',()=>{
   const on=tools.classList.toggle('edit');
+  bText.setAttribute('aria-expanded',String(on));
   if(on){tin.value=spinText;tin.focus();tin.select();}
 });
 function applyText(){const t=tin.value.trim().slice(0,24)||'HELL-OW';spinText=t;setSpinText(t);try{localStorage.setItem('relojText',t);}catch(e){}}
 tin.addEventListener('input',applyText);
-tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){tools.classList.remove('edit');tin.blur();}});
+tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){tools.classList.remove('edit');bText.setAttribute('aria-expanded','false');tin.blur();}});
 document.getElementById('bTheme').addEventListener('click',()=>{themeIdx=(themeIdx+1)%THEMES.length;applyTheme(themeIdx);});
 const bS=document.getElementById('bSound');
-bS.addEventListener('click',()=>{soundOn=!soundOn;if(soundOn&&!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac&&ac.state==='suspended')ac.resume();bS.textContent=soundOn?'🔊':'🔇';});
+bS.setAttribute('aria-pressed','false');
+bS.addEventListener('click',()=>{soundOn=!soundOn;try{if(soundOn&&!ac){const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(AudioContextClass)ac=new AudioContextClass();else soundOn=false;}if(ac&&ac.state==='suspended')ac.resume();}catch(e){soundOn=false;}bS.textContent=soundOn?'🔊':'🔇';bS.setAttribute('aria-pressed',String(soundOn));});
 const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;
 if(!canFull&&!canWake)bF.style.display='none';
 async function wake(on){try{if(on&&canWake&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null;});}else if(!on&&wl){await wl.release();wl=null;}}catch(e){}}
@@ -266,8 +276,10 @@ let seqT=[];
 function later(fn,ms){seqT.push(setTimeout(fn,ms));}
 function play(){
   seqT.forEach(clearTimeout);seqT=[];
+  hover=false;clearTimeout(resetT);
   svg.classList.remove('go','bD','bM','bW');
   IDS.forEach(id=>{const g=document.getElementById(id);g.classList.remove('lit');g.style.transition='none';g.style.transform='rotate(0deg)';void g.getBoundingClientRect();g.style.transition='';});
+  if(RM){setCalendar();svg.classList.add('go');return;}
   randomize();
   const t=targets();
   const step=(id,cls,at)=>{
@@ -279,8 +291,21 @@ function play(){
 }
 
 applyTheme(themeIdx);setCalendar();updateText();setInterval(setCalendar,30000);setInterval(updateText,1000);tick();play();
-svg.addEventListener('click',play);
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+let touchIntro=false,lastPointerType='';
+svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
+svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});
+svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hoverOff();});
+svg.addEventListener('click',e=>{
+  if(e.detail>0&&lastPointerType==='touch'&&!svg.classList.contains('go')){
+    touchIntro=!touchIntro;
+    if(touchIntro)hoverOn();else hoverOff();
+    return;
+  }
+  touchIntro=false;play();
+});
+svg.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();play();}});
+motionQuery.addEventListener?.('change',e=>{RM=e.matches;if(RM)play();});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>

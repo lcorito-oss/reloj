@@ -15,7 +15,7 @@
 <meta property="og:title" content="Clock Modern Way">
 <meta property="og:image" content="icon-512.png">
 
-<link href="https://fonts.googleapis.com/css2?family=Pirata+One&display=swap" rel="stylesheet">
+
 <style>
 :root{color-scheme:dark;--bg:#000;--band:#000;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#3ddc84}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -49,7 +49,7 @@ svg.go .intro,svg.go .avatar{opacity:0}
 #aS,#aM,#aH{opacity:0;transition:opacity .8s}
 svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 .intro text,#spin text{fill:#a9a9a9;font-weight:600}
-#spin text{font-family:'Pirata One','Metal Mania',serif;font-weight:400;font-size:14px;fill:#c9c9c9}
+#spin text{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:14px;fill:#c9c9c9}
 .nums text{fill:#ccc;font-weight:600;font-size:13px}
 .nums text:nth-child(2){fill:var(--day)}
 .nums text:nth-child(3){fill:var(--mon)}
@@ -280,12 +280,12 @@ function updateText(){
   svg.setAttribute('aria-label',`${info.textContent}. Activa para repetir la presentación.`);
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
-function neonTheme(){
-  const r=(a,b)=>a+Math.random()*(b-a), h=r(0,360);
-  const hs=[h,(h+120+r(-25,25)+360)%360,(h+240+r(-25,25)+360)%360];
-  const c=x=>`hsl(${Math.round(x)},100%,${x>200&&x<270?70:58}%)`;
-  return {d:c(hs[0]),m:c(hs[1]),w:c(hs[2]),g:c(hs[Math.floor(Math.random()*3)])};
-}
+const THEMES = [
+  {"d":"#ff3b5c","m":"#4da3ff","w":"#3ddc84","g":"#4da3ff"},
+  {"d":"#ffb86b","m":"#b79cff","w":"#54e0e0","g":"#b79cff"},
+  {"d":"#ff7489","m":"#72b7ff","w":"#62e69a","g":"#72b7ff"}
+];
+function neonTheme(){return THEMES[Math.floor(Math.random()*THEMES.length)];}
 function applyTheme(t){const s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);}
 const tools=document.getElementById('tools'), tin=document.getElementById('txt');
 const bText=document.getElementById('bText');

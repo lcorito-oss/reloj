@@ -138,7 +138,8 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 @media(max-width:390px){.moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}.moon-symbol{width:46px;height:46px;font-size:1.75rem}.moon-header{align-items:flex-start;flex-direction:column;gap:3px}}
 @media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
 
-#tools{display:none!important}
+#tools{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s ease}
+#tools.controls-visible,#tools:focus-within,#tools.edit{opacity:1;visibility:visible;pointer-events:auto}
 
 @media (pointer:coarse){#hS{filter:none}}
 </style>
@@ -390,6 +391,25 @@ const THEMES = [
 function neonTheme(){return THEMES[Math.floor(Math.random()*THEMES.length)];}
 function applyTheme(t){const s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);}
 const tools=document.getElementById('tools'), tin=document.getElementById('txt');
+const appShell=document.querySelector('.app-shell');
+let controlsTimer, skipClockClick=false;
+function showControls(){
+  tools.classList.add('controls-visible');
+  clearTimeout(controlsTimer);
+  controlsTimer=setTimeout(()=>{if(!tools.matches(':focus-within'))tools.classList.remove('controls-visible');},5000);
+}
+appShell.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')showControls();},{passive:true});
+appShell.addEventListener('focusin',showControls);
+tools.addEventListener('focusout',()=>setTimeout(()=>{if(!tools.matches(':focus-within'))showControls();},0));
+document.addEventListener('pointerdown',e=>{
+  if(e.pointerType!=='touch'&&e.pointerType!=='pen')return;
+  const wasVisible=tools.classList.contains('controls-visible')||tools.matches(':focus-within');
+  showControls();
+  if(!wasVisible&&e.target.closest?.('#clock')){
+    skipClockClick=true;
+    setTimeout(()=>{skipClockClick=false;},700);
+  }
+},{passive:true});
 const bText=document.getElementById('bText');
 bText.setAttribute('aria-expanded','false');
 bText.addEventListener('click',()=>{
@@ -463,6 +483,7 @@ svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});
 svg.addEventListener('pointerleave',e=>{if(e.pointerType==='mouse')hoverOff();});
 svg.addEventListener('click',e=>{
+  if(skipClockClick){skipClockClick=false;e.preventDefault();return;}
   if(e.detail>0&&lastPointerType==='touch'&&!svg.classList.contains('go')){
     touchIntro=!touchIntro;
     if(touchIntro)hoverOn();else hoverOff();

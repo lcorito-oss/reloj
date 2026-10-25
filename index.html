@@ -83,9 +83,61 @@ button:hover{border-color:#888;color:#fff}
 #neon feFlood{flood-color:#1f6bff}
 #spin text{fill:#1f6bff}
 #info,#info span{color:#1f6bff!important}
+:root{--bg:#080d18;--band:#101a29;--arc:#31425c;--txt:#cbd5e1;color-scheme:dark}
+html,body{min-height:100%;height:auto}
+body{min-height:100svh;justify-content:center;gap:0;overflow-x:hidden;overflow-y:auto;padding:max(28px,env(safe-area-inset-top)) 20px max(22px,env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 0%,#1d2c48 0%,#0c1423 42%,#080d18 78%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.45;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);background-size:190px 190px,230px 230px,270px 270px}
+.app-shell{position:relative;width:min(100%,980px);margin:auto}
+.app-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 22px;padding:0 4px}
+.eyebrow,.section-kicker{color:#91baff;font-size:.72rem;font-weight:750;letter-spacing:.18em;text-transform:uppercase}
+h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:normal;font-weight:650;letter-spacing:-.045em;line-height:1.05}
+.lede{margin-top:10px;max-width:38rem;color:#9eacc2;font-size:.96rem;line-height:1.6}
+.header-badge{flex:none;display:flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid #ffffff17;border-radius:999px;background:#ffffff08;color:#c6d2e5;font-size:.82rem}
+.header-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#67e8a5;box-shadow:0 0 14px #67e8a588}
+.clock-panel{display:grid;grid-template-columns:minmax(280px,1.05fr) minmax(300px,.95fr);align-items:center;gap:clamp(16px,4vw,54px);padding:clamp(20px,4vw,46px);border:1px solid #ffffff18;border-radius:30px;background:linear-gradient(145deg,#ffffff0b,#ffffff04 62%);box-shadow:0 28px 90px #0007,inset 0 1px #ffffff0c;backdrop-filter:blur(18px)}
+.clock-stage{display:grid;place-items:center;min-width:0;padding:10px;border-radius:50%;background:radial-gradient(circle,#1c2a42 0%,#111b2d 56%,transparent 72%)}
+#clock{display:block;width:min(100%,440px);max-height:none;filter:drop-shadow(0 18px 36px #0006)}
+#clock:focus-visible{outline:2px solid #91baff;outline-offset:8px}
+.clock-details{min-width:0;padding:8px 0}
+.section-kicker{margin-bottom:15px;color:#71839f}
+#info{min-height:3.1em;color:#f2f6ff!important;font-size:clamp(1.3rem,2.4vw,1.85rem);font-weight:600;letter-spacing:-.025em;line-height:1.4;text-align:left}
+#info span{color:#f2f6ff!important}
+.details-copy{margin-top:13px;max-width:25rem;color:#9eacc2;font-size:.92rem;line-height:1.7}
+.ring-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:25px 0 28px}
+.legend-item{display:flex;align-items:center;gap:8px;color:#c2cede;font-size:.78rem}
+.legend-dot{width:9px;height:9px;flex:none;border-radius:50%;background:var(--dot);box-shadow:0 0 12px color-mix(in srgb,var(--dot),transparent 45%)}
+#tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;opacity:1}
+#tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:72px;padding:10px 6px;border:1px solid #ffffff18;border-radius:17px;background:#ffffff08;color:#f2f6ff;font-size:1.2rem;opacity:1;transition:background .18s,border-color .18s,transform .18s}
+#tools button::after{content:attr(data-label);color:#aebbd0;font-size:.67rem;font-weight:600;letter-spacing:.01em}
+#tools button:hover{transform:translateY(-2px);border-color:#91baff70;background:#91baff14;color:#fff}
+#tools button:focus-visible,#txt:focus-visible{outline:2px solid #91baff;outline-offset:3px}
+#tools button[aria-pressed="true"]{border-color:#67e8a566;background:#67e8a512}
+#txt{grid-column:1/-1;width:100%;min-height:42px;padding:10px 13px;border-radius:12px;background:#0b1321;color:#f2f6ff;font:inherit}
+#txt::placeholder{color:#7d8ca2}
+.app-footer{display:flex;justify-content:space-between;gap:18px;margin-top:16px;padding:0 6px;color:#7f8da4;font-size:.76rem;line-height:1.5}
+.app-footer strong{color:#aab8cc;font-weight:600}
+#face{filter:url(#neon)}
+#neon feFlood{flood-color:#7fb9ff}
+#spin text{fill:#7fb9ff}
+#info,#info span{color:#f2f6ff!important}
+@media(max-width:700px){body{padding-left:14px;padding-right:14px}.app-header{align-items:flex-start;flex-direction:column;gap:16px}.header-badge{align-self:flex-start}.clock-panel{grid-template-columns:1fr;gap:4px;border-radius:24px;padding:18px}.clock-stage{width:min(100%,430px);margin:auto;padding:0}.clock-details{padding:0 4px 4px}.section-kicker{margin-bottom:8px}#info{min-height:2.8em}.ring-legend{margin:18px 0 20px}.app-footer{flex-direction:column;gap:3px}}
+@media(max-width:390px){#tools{grid-template-columns:repeat(2,minmax(0,1fr))}.ring-legend{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){#tools button{transition:none}}
+
 </style>
 </head>
 <body>
+<main class="app-shell">
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Reloj · en tiempo real</p>
+      <h1>El tiempo, con otra mirada</h1>
+      <p class="lede">Una lectura circular del día, el mes y la semana, acompañada por la hora exacta.</p>
+    </div>
+    <div class="header-badge">Hora local</div>
+  </header>
+  <section class="clock-panel" aria-label="Reloj y calendario circular">
+    <div class="clock-stage">
 <svg id="clock" viewBox="0 0 400 400" role="button" tabindex="0" aria-label="Reloj interactivo. Activa para repetir la presentación.">
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
@@ -143,7 +195,7 @@ button:hover{border-color:#888;color:#fff}
       <feMerge><feMergeNode in="g"/><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
-  <circle cx="200" cy="200" r="196" fill="#000"/>
+  <circle cx="200" cy="200" r="196" fill="#0b1422"/>
   <g fill="none" stroke="var(--band)" stroke-width="11">
     <circle cx="200" cy="200" r="178"/><circle cx="200" cy="200" r="138"/>
     <circle cx="200" cy="200" r="100"/><circle cx="200" cy="200" r="64" stroke-width="16"/>
@@ -173,7 +225,7 @@ button:hover{border-color:#888;color:#fff}
     <g id="rMon" class="ring" style="transform-origin:200px 200px"></g>
     <g id="rWk" class="ring" style="transform-origin:200px 200px"></g>
   </g>
-  <circle cx="200" cy="200" r="96" fill="#000"/>
+  <circle cx="200" cy="200" r="96" fill="#0b1422"/>
   <circle id="face" cx="200" cy="200" r="96" fill="none" stroke="#cfe8ff" stroke-width="1.6"/>
   <!-- búho vectorial -->
   <g class="avatar">
@@ -192,14 +244,27 @@ button:hover{border-color:#888;color:#fff}
     <circle cx="200" cy="200" r="4" fill="#fff"/>
   </g>
 </svg>
-<div id="info"></div>
-<div id="tools">
-  <button id="bTheme" type="button" title="Cambiar colores" aria-label="Cambiar colores">🎨</button>
-  <button id="bSound" type="button" title="Sonido tic-tac" aria-label="Sonido tic-tac">🔇</button>
-  <button id="bFull" type="button" title="Pantalla completa y pantalla encendida" aria-label="Pantalla completa">⛶</button>
-  <button id="bText" type="button" title="Escribir tu propio texto" aria-label="Escribir tu propio texto">✏️</button>
-  <input id="txt" type="text" maxlength="24" placeholder="Tu texto" aria-label="Texto que gira" autocomplete="off">
-</div>
+    </div>
+    <div class="clock-details">
+      <p class="section-kicker">Ahora mismo</p>
+      <div id="info"></div>
+      <p class="details-copy">Los anillos muestran el día del mes, el mes y el día de la semana. Toca el reloj para volver a ver la presentación.</p>
+      <div class="ring-legend" aria-label="Leyenda de los anillos">
+        <span class="legend-item"><i class="legend-dot" style="--dot:var(--day)"></i>Día</span>
+        <span class="legend-item"><i class="legend-dot" style="--dot:var(--mon)"></i>Mes</span>
+        <span class="legend-item"><i class="legend-dot" style="--dot:var(--wk)"></i>Semana</span>
+      </div>
+      <div id="tools">
+  <button id="bTheme" type="button" title="Cambiar paleta" aria-label="Cambiar paleta de colores" data-label="Color">🎨</button>
+  <button id="bSound" type="button" title="Activar sonido" aria-label="Activar sonido tic tac" data-label="Sonido">🔇</button>
+  <button id="bFull" type="button" title="Pantalla completa y pantalla encendida" aria-label="Pantalla completa" data-label="Pantalla">⛶</button>
+  <button id="bText" type="button" title="Editar texto" aria-label="Escribir texto personalizado" data-label="Texto">✏️</button>
+  <input id="txt" type="text" maxlength="24" placeholder="Escribe el texto que girará en el reloj" aria-label="Texto que gira" autocomplete="off">
+      </div>
+    </div>
+  </section>
+  <footer class="app-footer"><span><strong>Clock Modern Way</strong> · Un reloj para detenerse un instante.</span><span>Funciona también sin conexión</span></footer>
+</main>
 <script>
 const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
 let dim=0;

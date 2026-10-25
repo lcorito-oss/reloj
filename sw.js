@@ -1,4 +1,4 @@
-const CACHE='reloj-v9';
+const CACHE='reloj-v10';
 const FILES=['./','./index.html','./manifest.json','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
@@ -9,6 +9,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil(Promise.all([
     caches.delete('reloj-v8'),
+    caches.delete('reloj-v9'),
     self.clients.claim()
   ]));
 });

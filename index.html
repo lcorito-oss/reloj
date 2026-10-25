@@ -367,7 +367,8 @@ document.getElementById('bTheme').addEventListener('click',()=>{applyTheme(neonT
 const bS=document.getElementById('bSound');
 bS.setAttribute('aria-pressed','false');
 bS.addEventListener('click',()=>{soundOn=!soundOn;try{if(soundOn&&!ac){const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(AudioContextClass)ac=new AudioContextClass();else soundOn=false;}if(ac&&ac.state==='suspended')ac.resume();}catch(e){soundOn=false;}bS.textContent=soundOn?'🔊':'🔇';bS.setAttribute('aria-pressed',String(soundOn));bS.setAttribute('aria-label',soundOn?'Desactivar sonido tic tac':'Activar sonido tic tac');bS.title=soundOn?'Desactivar sonido':'Activar sonido';});
-const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;\nbF.setAttribute('aria-pressed','false');
+const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;
+bF.setAttribute('aria-pressed','false');
 if(!canFull&&!canWake)bF.style.display='none';
 async function wake(on){try{if(on&&canWake&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null;});}else if(!on&&wl){await wl.release();wl=null;}}catch(e){}}
 bF.addEventListener('click',async()=>{

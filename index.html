@@ -126,7 +126,7 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 
 
 .moon-card{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:15px;margin-top:22px;padding:16px;border:1px solid #ffffff16;border-radius:18px;background:linear-gradient(135deg,#b9d6ff12,#ffffff04)}
-.moon-symbol{display:grid;place-items:center;width:54px;height:54px;border:1px solid #dbeafe22;border-radius:16px;background:#0b1321;font-size:2rem;line-height:1}
+.moon-symbol{display:block;width:54px;height:54px;padding:5px;border:1px solid #dbeafe22;border-radius:16px;background:#0b1321}
 .moon-content{min-width:0}
 .moon-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .moon-label{color:#91baff;font-size:.65rem;font-weight:750;letter-spacing:.16em}
@@ -135,7 +135,7 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 .moon-meter{height:5px;overflow:hidden;margin-top:9px;border-radius:99px;background:#ffffff15}
 .moon-meter span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#83aef3,#e4efff);transition:width .5s ease}
 .moon-age{margin-top:6px;color:#8e9db3;font-size:.69rem}
-@media(max-width:390px){.moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}.moon-symbol{width:46px;height:46px;font-size:1.75rem}.moon-header{align-items:flex-start;flex-direction:column;gap:3px}}
+@media(max-width:390px){.moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}.moon-symbol{width:46px;height:46px;padding:4px}.moon-header{align-items:flex-start;flex-direction:column;gap:3px}}
 @media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
 
 #tools{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s ease}
@@ -258,7 +258,7 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
     <div class="clock-details">
       <div id="info"></div>
       <div class="moon-card" id="moon-phase" role="group" aria-label="Fase lunar">
-        <span class="moon-symbol" id="moon-icon" aria-hidden="true">🌔</span>
+        <svg class="moon-symbol" id="moon-icon" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#111827"/><path id="moon-lit" fill="#f4f6fa"/><circle cx="50" cy="50" r="44" fill="none" stroke="#f4f6fa" stroke-width="2"/></svg>
         <div class="moon-content">
           <div class="moon-header">
             <span class="moon-label">FASE LUNAR</span>
@@ -341,7 +341,7 @@ function tick(){
   if(sec!==lastS){lastS=sec;if(soundOn)tickSound();}
   const set=(id,a)=>document.getElementById(id).setAttribute('transform',`rotate(${a} 200 200)`);
   set('hS',s*6);set('hM',m*6);set('hH',h*30);
-  if(!RM&&!svg.classList.contains('go'))set('spin',(Date.now()/1000*6)%360);
+  set('spin',(Date.now()/1000*6)%360);
   if(RM)setTimeout(tick,1000-(Date.now()%1000));
   else requestAnimationFrame(tick);
 }
@@ -354,8 +354,9 @@ function updateText(){
   const d=new Date();
   const date=new Intl.DateTimeFormat('es',{weekday:'long',day:'numeric',month:'long'}).format(d);
   const dateText=date.charAt(0).toUpperCase()+date.slice(1);
-  info.textContent=dateText;
-  svg.setAttribute('aria-label',`${dateText}. Reloj analógico interactivo. Activa para repetir la presentación.`);
+  const time=d.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
+  info.textContent=`${dateText} · ${time}`;
+  svg.setAttribute('aria-label',`${dateText}, ${time}. Reloj analógico interactivo. Activa para repetir la presentación.`);
 }
 const MOON_CYCLE_DAYS=29.530588853;
 const REFERENCE_NEW_MOON=Date.UTC(2000,0,6,18,14);
@@ -364,16 +365,20 @@ function updateMoonPhase(){
   const phase=((days/MOON_CYCLE_DAYS)%1+1)%1;
   const age=phase*MOON_CYCLE_DAYS;
   const illumination=Math.round((1-Math.cos(2*Math.PI*phase))*50);
-  let name,icon;
-  if(phase<.03||phase>=.97){name='Luna nueva';icon='🌑';}
-  else if(phase<.22){name='Luna creciente';icon='🌒';}
-  else if(phase<.28){name='Cuarto creciente';icon='🌓';}
-  else if(phase<.47){name='Gibosa creciente';icon='🌔';}
-  else if(phase<.53){name='Luna llena';icon='🌕';}
-  else if(phase<.72){name='Gibosa menguante';icon='🌖';}
-  else if(phase<.78){name='Cuarto menguante';icon='🌗';}
-  else{name='Luna menguante';icon='🌘';}
-  document.getElementById('moon-icon').textContent=icon;
+  let name;
+  if(phase<.03||phase>=.97){name='Luna nueva';}
+  else if(phase<.22){name='Luna creciente';}
+  else if(phase<.28){name='Cuarto creciente';}
+  else if(phase<.47){name='Gibosa creciente';}
+  else if(phase<.53){name='Luna llena';}
+  else if(phase<.72){name='Gibosa menguante';}
+  else if(phase<.78){name='Cuarto menguante';}
+  else{name='Luna menguante';}
+  const cosine=Math.cos(2*Math.PI*phase), waxing=phase<.5, radius=44, center=50;
+  const terminatorRadius=Math.max(.001,Math.abs(cosine)*radius);
+  const outerSweep=waxing?1:0, innerSweep=waxing?(cosine<0?1:0):(cosine<0?0:1);
+  const moonPath=`M ${center} ${center-radius} A ${radius} ${radius} 0 0 ${outerSweep} ${center} ${center+radius} A ${terminatorRadius} ${radius} 0 0 ${innerSweep} ${center} ${center-radius} Z`;
+  document.getElementById('moon-lit').setAttribute('d',moonPath);
   document.getElementById('moon-name').textContent=name;
   document.getElementById('moon-illumination').textContent=`${illumination}% iluminada`;
   document.getElementById('moon-age').textContent=`Edad aproximada: ${age.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} días`;
@@ -477,7 +482,7 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,30*60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});

@@ -340,7 +340,7 @@ function tick(){
   if(sec!==lastS){lastS=sec;if(soundOn)tickSound();}
   const set=(id,a)=>document.getElementById(id).setAttribute('transform',`rotate(${a} 200 200)`);
   set('hS',s*6);set('hM',m*6);set('hH',h*30);
-  if(!RM)set('spin',(Date.now()/1000*6)%360);
+  if(!RM&&!svg.classList.contains('go'))set('spin',(Date.now()/1000*6)%360);
   if(RM)setTimeout(tick,1000-(Date.now()%1000));
   else requestAnimationFrame(tick);
 }

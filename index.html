@@ -124,6 +124,20 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 @media(max-width:390px){#tools{grid-template-columns:repeat(2,minmax(0,1fr))}.ring-legend{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){#tools button{transition:none}}
 
+
+.moon-card{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:15px;margin-top:22px;padding:16px;border:1px solid #ffffff16;border-radius:18px;background:linear-gradient(135deg,#b9d6ff12,#ffffff04)}
+.moon-symbol{display:grid;place-items:center;width:54px;height:54px;border:1px solid #dbeafe22;border-radius:16px;background:#0b1321;font-size:2rem;line-height:1}
+.moon-content{min-width:0}
+.moon-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.moon-label{color:#91baff;font-size:.65rem;font-weight:750;letter-spacing:.16em}
+.moon-illumination{color:#b9c8dd;font-size:.72rem;font-variant-numeric:tabular-nums}
+.moon-name{display:block;margin-top:5px;color:#f2f6ff;font-size:1.05rem;font-weight:650}
+.moon-meter{height:5px;overflow:hidden;margin-top:9px;border-radius:99px;background:#ffffff15}
+.moon-meter span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#83aef3,#e4efff);transition:width .5s ease}
+.moon-age{margin-top:6px;color:#8e9db3;font-size:.69rem}
+@media(max-width:390px){.moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}.moon-symbol{width:46px;height:46px;font-size:1.75rem}.moon-header{align-items:flex-start;flex-direction:column;gap:3px}}
+@media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
+
 </style>
 </head>
 <body>
@@ -249,6 +263,20 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
       <p class="section-kicker">Ahora mismo</p>
       <div id="info"></div>
       <p class="details-copy">Los anillos muestran el día del mes, el mes y el día de la semana. Toca el reloj para volver a ver la presentación.</p>
+      <div class="moon-card" aria-label="Fase lunar">
+        <span class="moon-symbol" id="moon-icon" aria-hidden="true">🌔</span>
+        <div class="moon-content">
+          <div class="moon-header">
+            <span class="moon-label">FASE LUNAR</span>
+            <span class="moon-illumination" id="moon-illumination">—% iluminada</span>
+          </div>
+          <strong class="moon-name" id="moon-name">Calculando fase…</strong>
+          <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando">
+            <span id="moon-meter-fill"></span>
+          </div>
+          <p class="moon-age" id="moon-age"></p>
+        </div>
+      </div>
       <div class="ring-legend" aria-label="Leyenda de los anillos">
         <span class="legend-item"><i class="legend-dot" style="--dot:var(--day)"></i>Día</span>
         <span class="legend-item"><i class="legend-dot" style="--dot:var(--mon)"></i>Mes</span>
@@ -344,6 +372,31 @@ function updateText(){
   parts.forEach(([t,c])=>{const s=document.createElement('span');s.textContent=t;if(c)s.style.color=c;info.appendChild(s);});
   svg.setAttribute('aria-label',`${info.textContent}. Activa para repetir la presentación.`);
 }
+const MOON_CYCLE_DAYS=29.530588853;
+const REFERENCE_NEW_MOON=Date.UTC(2000,0,6,18,14);
+function updateMoonPhase(){
+  const days=(Date.now()-REFERENCE_NEW_MOON)/86400000;
+  const phase=((days/MOON_CYCLE_DAYS)%1+1)%1;
+  const age=phase*MOON_CYCLE_DAYS;
+  const illumination=Math.round((1-Math.cos(2*Math.PI*phase))*50);
+  let name,icon;
+  if(phase<.03||phase>=.97){name='Luna nueva';icon='🌑';}
+  else if(phase<.22){name='Luna creciente';icon='🌒';}
+  else if(phase<.28){name='Cuarto creciente';icon='🌓';}
+  else if(phase<.47){name='Gibosa creciente';icon='🌔';}
+  else if(phase<.53){name='Luna llena';icon='🌕';}
+  else if(phase<.72){name='Gibosa menguante';icon='🌖';}
+  else if(phase<.78){name='Cuarto menguante';icon='🌗';}
+  else{name='Luna menguante';icon='🌘';}
+  document.getElementById('moon-icon').textContent=icon;
+  document.getElementById('moon-name').textContent=name;
+  document.getElementById('moon-illumination').textContent=`${illumination}% iluminada`;
+  document.getElementById('moon-age').textContent=`Edad aproximada: ${age.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} días`;
+  const meter=document.getElementById('moon-meter');
+  meter.setAttribute('aria-valuenow',String(illumination));
+  meter.setAttribute('aria-valuetext',`${illumination}% iluminada`);
+  document.getElementById('moon-meter-fill').style.width=`${illumination}%`;
+}
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES = [
   {"d":"#ff3b5c","m":"#4da3ff","w":"#3ddc84","g":"#4da3ff"},
@@ -420,7 +473,7 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-applyTheme(neonTheme());setCalendar();updateText();setInterval(setCalendar,30000);setInterval(updateText,1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});

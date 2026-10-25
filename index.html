@@ -6,7 +6,7 @@
 <title>Clock Modern Way</title>
 <meta name="description" content="Reloj analógico interactivo con calendario circular, temas de color y modo sin conexión.">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#080d18">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -269,7 +269,7 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
 let dim=0;
 const months=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
-const wk=['DOM','LUN','MAR','MIE','JUE','VIE','SAB'];
+const wk=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
 
 function txt(g,t,r,size,angle,color){
   const el=document.createElementNS(NS,'text');
@@ -366,17 +366,17 @@ tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){tools.c
 document.getElementById('bTheme').addEventListener('click',()=>{applyTheme(neonTheme());});
 const bS=document.getElementById('bSound');
 bS.setAttribute('aria-pressed','false');
-bS.addEventListener('click',()=>{soundOn=!soundOn;try{if(soundOn&&!ac){const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(AudioContextClass)ac=new AudioContextClass();else soundOn=false;}if(ac&&ac.state==='suspended')ac.resume();}catch(e){soundOn=false;}bS.textContent=soundOn?'🔊':'🔇';bS.setAttribute('aria-pressed',String(soundOn));});
-const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;
+bS.addEventListener('click',()=>{soundOn=!soundOn;try{if(soundOn&&!ac){const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(AudioContextClass)ac=new AudioContextClass();else soundOn=false;}if(ac&&ac.state==='suspended')ac.resume();}catch(e){soundOn=false;}bS.textContent=soundOn?'🔊':'🔇';bS.setAttribute('aria-pressed',String(soundOn));bS.setAttribute('aria-label',soundOn?'Desactivar sonido tic tac':'Activar sonido tic tac');bS.title=soundOn?'Desactivar sonido':'Activar sonido';});
+const bF=document.getElementById('bFull'), canFull=!!document.fullscreenEnabled, canWake='wakeLock' in navigator;\nbF.setAttribute('aria-pressed','false');
 if(!canFull&&!canWake)bF.style.display='none';
 async function wake(on){try{if(on&&canWake&&!wl){wl=await navigator.wakeLock.request('screen');wl.addEventListener('release',()=>{wl=null;});}else if(!on&&wl){await wl.release();wl=null;}}catch(e){}}
 bF.addEventListener('click',async()=>{
-  const on=bF.dataset.on!=='1';bF.dataset.on=on?'1':'0';
+  const on=bF.dataset.on!=='1';bF.dataset.on=on?'1':'0';bF.setAttribute('aria-pressed',String(on));
   try{if(canFull){if(on)await document.documentElement.requestFullscreen();else if(document.fullscreenElement)await document.exitFullscreen();}}catch(e){}
   wake(on);
 });
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&bF.dataset.on==='1')wake(true);});
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&bF.dataset.on==='1'){bF.dataset.on='0';wake(false);}});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&bF.dataset.on==='1'){bF.dataset.on='0';bF.setAttribute('aria-pressed','false');wake(false);}});
 if(!RM){
   document.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse')return;const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;svg.style.transform=`perspective(900px) rotateY(${x*12}deg) rotateX(${-y*12}deg)`;});
   document.documentElement.addEventListener('pointerleave',()=>{svg.style.transform='';});

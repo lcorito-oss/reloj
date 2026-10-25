@@ -280,9 +280,13 @@ function updateText(){
   svg.setAttribute('aria-label',`${info.textContent}. Activa para repetir la presentación.`);
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
-const THEMES=[{d:'#ff3b5c',m:'#4da3ff',w:'#3ddc84',g:'#3ddc84'},{d:'#ff7a1a',m:'#ffd166',w:'#ff4d6d',g:'#ffb347'},{d:'#ff7ad9',m:'#7b9cff',w:'#c77dff',g:'#c77dff'},{d:'#ff6b6b',m:'#2ec4b6',w:'#9bf6ff',g:'#2ec4b6'}];
-try{const savedTheme=Number(localStorage.getItem('relojTheme'));if(Number.isInteger(savedTheme)&&savedTheme>=0&&savedTheme<THEMES.length)themeIdx=savedTheme;}catch(e){}
-function applyTheme(i){const t=THEMES[i],s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);try{localStorage.setItem('relojTheme',i);}catch(e){}}
+function neonTheme(){
+  const r=(a,b)=>a+Math.random()*(b-a), h=r(0,360);
+  const hs=[h,(h+120+r(-25,25)+360)%360,(h+240+r(-25,25)+360)%360];
+  const c=x=>`hsl(${Math.round(x)},100%,${x>200&&x<270?70:58}%)`;
+  return {d:c(hs[0]),m:c(hs[1]),w:c(hs[2]),g:c(hs[Math.floor(Math.random()*3)])};
+}
+function applyTheme(t){const s=document.documentElement.style;s.setProperty('--day',t.d);s.setProperty('--mon',t.m);s.setProperty('--wk',t.w);s.setProperty('--glow',t.g);}
 const tools=document.getElementById('tools'), tin=document.getElementById('txt');
 const bText=document.getElementById('bText');
 bText.setAttribute('aria-expanded','false');
@@ -294,7 +298,7 @@ bText.addEventListener('click',()=>{
 function applyText(){const t=tin.value.trim().slice(0,24)||'HELL-OW';spinText=t;setSpinText(t);try{localStorage.setItem('relojText',t);}catch(e){}}
 tin.addEventListener('input',applyText);
 tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key==='Escape'){tools.classList.remove('edit');bText.setAttribute('aria-expanded','false');tin.blur();}});
-document.getElementById('bTheme').addEventListener('click',()=>{themeIdx=(themeIdx+1)%THEMES.length;applyTheme(themeIdx);});
+document.getElementById('bTheme').addEventListener('click',()=>{applyTheme(neonTheme());});
 const bS=document.getElementById('bSound');
 bS.setAttribute('aria-pressed','false');
 bS.addEventListener('click',()=>{soundOn=!soundOn;try{if(soundOn&&!ac){const AudioContextClass=window.AudioContext||window.webkitAudioContext;if(AudioContextClass)ac=new AudioContextClass();else soundOn=false;}if(ac&&ac.state==='suspended')ac.resume();}catch(e){soundOn=false;}bS.textContent=soundOn?'🔊':'🔇';bS.setAttribute('aria-pressed',String(soundOn));});
@@ -318,8 +322,7 @@ function targets(){const d=new Date();return {gD:(d.getDate()-1)*360/dim+offs.D,
 function randomize(){
   offs.D=Math.random()*360;offs.M=Math.random()*360;offs.W=Math.random()*360;
   [['rDay','D'],['rMon','M'],['rWk','W']].forEach(([id,k])=>{const g=document.getElementById(id);g.style.transition='none';g.style.transform=`rotate(${offs[k]}deg)`;void g.getBoundingClientRect();g.style.transition='';});
-  let i;do{i=Math.floor(Math.random()*THEMES.length);}while(i===themeIdx&&THEMES.length>1);
-  themeIdx=i;applyTheme(i);setCalendar();
+  applyTheme(neonTheme());setCalendar();
 }
 function hoverOn(){
   hover=true;clearTimeout(resetT);const t=targets();
@@ -351,7 +354,7 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-applyTheme(themeIdx);setCalendar();updateText();setInterval(setCalendar,30000);setInterval(updateText,1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();setInterval(setCalendar,30000);setInterval(updateText,1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});

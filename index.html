@@ -100,7 +100,7 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 #clock:focus-visible{outline:2px solid #91baff;outline-offset:8px}
 .clock-details{min-width:0;padding:8px 0}
 .section-kicker{margin-bottom:15px;color:#71839f}
-#info{min-height:3.1em;color:#f2f6ff!important;font-size:clamp(1.3rem,2.4vw,1.85rem);font-weight:600;letter-spacing:-.025em;line-height:1.4;text-align:left}
+#info{min-height:1.5em;color:#f2f6ff!important;font-size:clamp(1.3rem,2.4vw,1.85rem);font-weight:600;letter-spacing:-.025em;line-height:1.4;text-align:left}
 #info span{color:#f2f6ff!important}
 .details-copy{margin-top:13px;max-width:25rem;color:#9eacc2;font-size:.92rem;line-height:1.7}
 .ring-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:25px 0 28px}
@@ -143,13 +143,6 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 </head>
 <body>
 <main class="app-shell">
-  <header class="app-header">
-    <div>
-      <p class="eyebrow">Reloj · en tiempo real</p>
-      <h1>El tiempo, con otra mirada</h1>
-    </div>
-    <div class="header-badge">Hora local</div>
-  </header>
   <section class="clock-panel" aria-label="Reloj y calendario circular">
     <div class="clock-stage">
 <svg id="clock" viewBox="0 0 400 400" role="button" tabindex="0" aria-label="Reloj interactivo. Activa para repetir la presentación.">
@@ -260,7 +253,6 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 </svg>
     </div>
     <div class="clock-details">
-      <p class="section-kicker">Ahora mismo</p>
       <div id="info"></div>
       <div class="moon-card" id="moon-phase" role="group" aria-label="Fase lunar">
         <span class="moon-symbol" id="moon-icon" aria-hidden="true">🌔</span>
@@ -356,14 +348,11 @@ let RM=motionQuery.matches;
 let ac,soundOn=false,lastS=-1,wl=null,themeIdx=0;
 const info=document.getElementById('info');
 function updateText(){
-  const d=new Date(), P={};
-  new Intl.DateTimeFormat('es',{weekday:'long',day:'numeric',month:'long'}).formatToParts(d).forEach(p=>{P[p.type]=p.value;});
-  const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
-  const time=d.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
-  const parts=[[cap(P.weekday),'var(--wk)'],[' ',''],[P.day,'var(--day)'],[' de ',''],[P.month,'var(--mon)'],[' · ',''],[time,'var(--glow)']];
-  info.textContent='';
-  parts.forEach(([t,c])=>{const s=document.createElement('span');s.textContent=t;if(c)s.style.color=c;info.appendChild(s);});
-  svg.setAttribute('aria-label',`${info.textContent}. Activa para repetir la presentación.`);
+  const d=new Date();
+  const date=new Intl.DateTimeFormat('es',{weekday:'long',day:'numeric',month:'long'}).format(d);
+  const dateText=date.charAt(0).toUpperCase()+date.slice(1);
+  info.textContent=dateText;
+  svg.setAttribute('aria-label',`${dateText}. Reloj analógico interactivo. Activa para repetir la presentación.`);
 }
 const MOON_CYCLE_DAYS=29.530588853;
 const REFERENCE_NEW_MOON=Date.UTC(2000,0,6,18,14);
@@ -466,7 +455,7 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,30*60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});

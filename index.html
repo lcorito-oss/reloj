@@ -196,18 +196,18 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 @media(prefers-reduced-motion:reduce){.moon-meter i{transition:none}}
 
 /* Google Calendar */
-.gcal-card{margin-top:14px;padding:16px 18px;border:1px solid #ffffff18;border-radius:24px;background:linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d}
+.gcal-card{margin-top:14px;margin-bottom:16px;padding:16px 18px;border:1px solid #ffffff18;border-radius:24px;background:linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d}
 .gcal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .gcal-actions{display:flex;gap:6px}
 .gcal-btn{padding:6px 12px;border:1px solid #91baff55;border-radius:999px;background:#91baff14;color:#dbe8ff;font:600 .72rem 'Segoe UI',sans-serif;cursor:pointer}
 .gcal-btn:hover{border-color:#91baff;color:#fff}
 .gcal-off{border-color:#ffffff22;background:transparent;color:#9ba8bc}
 .gcal-btn[hidden]{display:none}
-.gcal-list{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:10px}
-.gcal-list li{display:grid;grid-template-columns:88px minmax(0,1fr);gap:10px;align-items:baseline;color:#eef1f7;font-size:.86rem}
+.gcal-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px}
+.gcal-list li{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:10px;align-items:baseline;color:#eef1f7;font-size:.86rem}
 .gcal-when{color:#91baff;font-size:.74rem;font-weight:700;text-transform:capitalize}
 .gcal-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gcal-sub{display:block;margin-top:2px;color:#8d9bb2;font-size:.72rem}
+.gcal-sub{color:#8d9bb2;font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gcal-msg{margin:10px 0 0;color:#9ba8bc;font-size:.78rem}
 .gcal-msg:empty{display:none}
 #rDay text.ev:not(.on){opacity:.95;filter:none;fill:#ffd27a;font-size:8.5px;font-weight:700}
@@ -702,13 +702,13 @@ function gcRender(){
   const now=Date.now(), t0=new Date();t0.setHours(0,0,0,0);
   const up=(gEvents||[]).filter(e=>e.e>now||(e.e===e.s&&e.s>=t0.getTime())).slice(0,5);
   up.forEach(ev=>{
-    const li=document.createElement('li'), w=document.createElement('span'), box=document.createElement('span'), ti=document.createElement('span'), sub=document.createElement('span');
+    const li=document.createElement('li'), w=document.createElement('span'), ti=document.createElement('span'), sub=document.createElement('span');
     const sd=new Date(ev.s), sday=new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()), diff=Math.round((sday-t0)/864e5);
     w.className='gcal-when';
     w.textContent=diff<=0?'Hoy':diff===1?'Mañana':sd.toLocaleDateString('es',{weekday:'short',day:'numeric',month:'short'}).replace('.','');
     ti.className='gcal-title';ti.textContent=ev.t;
-    sub.className='gcal-sub';sub.textContent=ev.a?'Todo el día':sd.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
-    box.appendChild(ti);box.appendChild(sub);li.appendChild(w);li.appendChild(box);list.appendChild(li);
+    sub.className='gcal-sub';sub.textContent=ev.a?'':sd.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
+    li.appendChild(w);li.appendChild(ti);li.appendChild(sub);list.appendChild(li);
   });
   if(!conn)gcMsg('Conecta tu cuenta para ver tus citas y cumpleaños.');
   else if(!up.length)gcMsg('Sin eventos en los próximos días.');

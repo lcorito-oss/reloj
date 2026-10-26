@@ -1,4 +1,4 @@
-const CACHE='reloj-v27';
+const CACHE='reloj-v28';
 const FILES=['./','./index.html','./manifest.json','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./assets/moon-surface.png'];
 
 self.addEventListener('install',event=>{

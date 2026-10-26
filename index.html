@@ -409,7 +409,7 @@ function drawSky(){
   const box=stage.getBoundingClientRect(),cx=box.left+box.width/2,cy=box.top+box.height/2;
   const days=Date.now()/86400000+2440587.5-2451545;
   const lst=(((280.46061837+360.98564736629*days+SKY_LON)%360)+360)%360*SKY_R;
-  const scale=Math.min(460,Math.max(360,Math.min(width,height)*.8)),projected=new Map();
+  const scale=Math.min(320,Math.max(240,Math.min(width,height)*.58)),projected=new Map();
   for(let index=0;index<SKY_STARS.length;index++){
     const [raDeg,decDeg,magnitude]=SKY_STARS[index],dec=decDeg*SKY_R,ha=lst-raDeg*SKY_R;
     const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(SKY_LAT*SKY_R)*Math.sin(dec)+Math.cos(SKY_LAT*SKY_R)*Math.cos(dec)*Math.cos(ha))));

@@ -1,4 +1,4 @@
-const CACHE='reloj-v17';
+const CACHE='reloj-v18';
 const FILES=['./','./index.html','./manifest.json','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./assets/moon-surface.png'];
 
 self.addEventListener('install',event=>{
@@ -17,6 +17,7 @@ self.addEventListener('activate',event=>{
     caches.delete('reloj-v14'),
     caches.delete('reloj-v15'),
     caches.delete('reloj-v16'),
+    caches.delete('reloj-v17'),
     self.clients.claim()
   ]));
 });

@@ -174,20 +174,12 @@ body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 
 .clock-panel{padding:clamp(8px,1.6vw,18px) 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
 @media(max-width:700px){.clock-panel{gap:10px;padding:4px 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}}
 
-/* Líneas suaves que conectan las estrellas de las constelaciones */
-.constellation-map{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;max-width:none;max-height:none;pointer-events:none;opacity:.19}
-.constellation-lines{fill:none;stroke:#a9bfdf;stroke-width:.9;stroke-linecap:round;stroke-linejoin:round}
-.constellation-lines circle{fill:#dbe7ff;stroke:none}
-
+/* Estrellas y constelaciones del cielo local, dibujadas detrás del reloj. */
+#sky{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;pointer-events:none}
 .app-shell{z-index:2}
 
-/* Una sola capa de cielo: los nodos y las líneas usan el mismo SVG y coordenadas. */
+/* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
 body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
-.constellation-map{opacity:1}
-.constellation-lines{fill:none;stroke:#a9bfdf;stroke-opacity:.24;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round}
-.constellation-lines circle{fill:#dbe7ff;stroke:none;opacity:.88}
-
-.background-stars circle{fill:#e4edff;stroke:none;opacity:.78}
 
 /* fecha centrada sobre la tarjeta Cielo de hoy */
 #info{text-align:center}
@@ -227,99 +219,7 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 </style>
 </head>
 <body>
-<svg class="constellation-map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  
-    <g class="constellation-lines">
-    <g class="constellation">
-      <path d="M145 171 L225 119 L300 178 L378 125 L455 185"/>
-      <circle cx="145" cy="171" r="2.2"/><circle cx="225" cy="119" r="2.2"/><circle cx="300" cy="178" r="2.2"/><circle cx="378" cy="125" r="2.2"/><circle cx="455" cy="185" r="2.2"/>
-      
-      
-    </g>
-    <g class="constellation">
-      <path d="M720 188 L850 166 L878 297 L735 321 Z M850 166 L925 103 L1000 82 L1065 118"/>
-      <circle cx="720" cy="188" r="2.2"/><circle cx="850" cy="166" r="2.2"/><circle cx="878" cy="297" r="2.2"/><circle cx="735" cy="321" r="2.2"/><circle cx="925" cy="103" r="2.2"/><circle cx="1000" cy="82" r="2.2"/><circle cx="1065" cy="118" r="2.2"/>
-      
-      
-    </g>
-    <g class="constellation">
-      <path d="M173 521 L287 612 L406 536 L505 632 L389 708 L287 612 L300 461"/>
-      <circle cx="173" cy="521" r="2.2"/><circle cx="287" cy="612" r="2.2"/><circle cx="406" cy="536" r="2.2"/><circle cx="505" cy="632" r="2.2"/><circle cx="389" cy="708" r="2.2"/><circle cx="300" cy="461" r="2.2"/>
-      
-      
-    </g>
-  </g>
-  <g class="background-stars" aria-hidden="true">
-    <circle cx="151.9" cy="92.2" r="1.2"/>
-    <circle cx="946" cy="288.5" r="0.8"/>
-    <circle cx="32.5" cy="146.9" r="1.1"/>
-    <circle cx="1161.4" cy="636.1" r="0.8"/>
-    <circle cx="1081" cy="254" r="0.8"/>
-    <circle cx="221.3" cy="83.5" r="0.8"/>
-    <circle cx="256.4" cy="357.2" r="0.7"/>
-    <circle cx="95.4" cy="770.6" r="0.7"/>
-    <circle cx="215.9" cy="367.6" r="1.1"/>
-    <circle cx="60.7" cy="496.2" r="0.8"/>
-    <circle cx="934.3" cy="140.6" r="0.9"/>
-    <circle cx="1035.2" cy="329.5" r="0.9"/>
-    <circle cx="578.5" cy="583.9" r="0.7"/>
-    <circle cx="1035.8" cy="460.8" r="1"/>
-    <circle cx="162.3" cy="278.6" r="1"/>
-    <circle cx="318.2" cy="107.1" r="1.1"/>
-    <circle cx="1074.6" cy="344.6" r="0.7"/>
-    <circle cx="79.7" cy="654.3" r="0.9"/>
-    <circle cx="92.6" cy="89" r="0.7"/>
-    <circle cx="1029.8" cy="167.8" r="1.2"/>
-    <circle cx="1164.6" cy="706.5" r="0.9"/>
-    <circle cx="336.7" cy="764.1" r="1.2"/>
-    <circle cx="340.9" cy="336" r="0.9"/>
-    <circle cx="658.7" cy="290.8" r="0.9"/>
-    <circle cx="767" cy="408.2" r="0.7"/>
-    <circle cx="1028.4" cy="647.4" r="0.8"/>
-    <circle cx="395.6" cy="487.7" r="1.2"/>
-    <circle cx="506.9" cy="462.4" r="0.7"/>
-    <circle cx="1091" cy="511" r="1.1"/>
-    <circle cx="436.1" cy="98.6" r="1"/>
-    <circle cx="449.5" cy="344.5" r="1.1"/>
-    <circle cx="383.9" cy="283.2" r="1.1"/>
-    <circle cx="695.8" cy="156.3" r="0.8"/>
-    <circle cx="302.7" cy="58.2" r="0.7"/>
-    <circle cx="973.6" cy="764.4" r="1"/>
-    <circle cx="148.4" cy="578.2" r="1"/>
-    <circle cx="464.6" cy="240.5" r="1.1"/>
-    <circle cx="426.9" cy="268.6" r="1.1"/>
-    <circle cx="114.8" cy="136.5" r="0.9"/>
-    <circle cx="91.1" cy="35.5" r="0.9"/>
-    <circle cx="550.4" cy="426.2" r="0.8"/>
-    <circle cx="295.6" cy="272.9" r="1"/>
-    <circle cx="266.4" cy="225.9" r="1.2"/>
-    <circle cx="843.2" cy="707" r="1"/>
-    <circle cx="325.1" cy="303.6" r="1.1"/>
-    <circle cx="673.6" cy="391.2" r="0.8"/>
-    <circle cx="548.4" cy="774.4" r="0.8"/>
-    <circle cx="456.6" cy="480.1" r="0.9"/>
-    <circle cx="364.7" cy="195" r="1"/>
-    <circle cx="49.1" cy="335.1" r="1.2"/>
-    <circle cx="88.4" cy="613.8" r="0.9"/>
-    <circle cx="803.5" cy="746.2" r="1.2"/>
-    <circle cx="473.3" cy="34.9" r="1"/>
-    <circle cx="784" cy="592.8" r="0.8"/>
-    <circle cx="1008.9" cy="719.9" r="0.7"/>
-    <circle cx="900" cy="59.4" r="1"/>
-    <circle cx="116.8" cy="676.9" r="0.9"/>
-    <circle cx="489.2" cy="377.5" r="1.1"/>
-    <circle cx="709.7" cy="95" r="1.1"/>
-    <circle cx="859.6" cy="430.5" r="1.1"/>
-    <circle cx="30.6" cy="615" r="1"/>
-    <circle cx="862.1" cy="474.2" r="1"/>
-    <circle cx="761.7" cy="668" r="0.8"/>
-    <circle cx="713.2" cy="601.7" r="1.1"/>
-    <circle cx="963.9" cy="594" r="1"/>
-    <circle cx="828" cy="575.3" r="0.8"/>
-    <circle cx="648.8" cy="531.4" r="0.7"/>
-    <circle cx="19.2" cy="62.9" r="1.1"/>
-  </g>
-</svg>
+<canvas id="sky" aria-hidden="true"></canvas>
 
 <main class="app-shell">
   <section class="clock-panel" aria-label="Reloj y calendario circular">
@@ -474,6 +374,60 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 </main>
 <script>
 const NS='http://www.w3.org/2000/svg', svg=document.getElementById('clock');
+const SKY_R=Math.PI/180, SKY_LAT=26.865, SKY_LON=-105.84;
+const SKY_STARS=[
+  [2.10,29.09,2.1],[2.29,59.15,2.3],[6.57,-42.3,2.4],[10.13,56.54,2.2],
+  [10.90,-17.98,2.0],[17.43,35.62,2.1],[24.43,-57.2,.5],[28.66,20.81,2.6],
+  [31.79,23.46,2.0],[37.95,89.26,2.0],[47.04,40.96,2.1],[51.08,49.86,1.8],
+  [68.98,16.51,.9],[78.63,-8.2,.2],[79.17,46.0,.1],[81.28,6.35,1.6],
+  [81.57,28.6,1.7],[84.05,-1.2,1.7],[88.79,7.4,.5],[93.72,22.51,3.3],
+  [95.74,22.51,2.9],[99.43,16.40,1.9],[100.98,25.13,3.1],[101.29,-16.7,-1.5],
+  [113.65,31.89,1.6],[114.82,5.2,.4],[116.33,28.03,1.1],[141.90,-8.66,2.0],
+  [152.09,11.97,1.4],[165.46,56.38,2.4],[165.93,61.75,1.8],[177.26,14.57,2.1],
+  [178.46,53.69,2.4],[186.65,-63.1,.8],[193.51,55.96,1.8],[200.98,54.93,2.3],
+  [201.30,-11.16,1.0],[206.89,49.31,1.9],[213.92,19.18,0],[215.59,38.3,3.0],
+  [219.90,-60.83,-.3],[221.25,27.07,2.4],[222.67,74.15,2.1],[233.67,26.71,2.2],
+  [247.35,-26.43,1.1],[263.73,12.56,2.1],[269.15,51.49,2.2],[279.23,38.78,0],
+  [297.70,8.87,.8],[306.41,-56.74,1.9],[310.36,45.28,1.3],[326.05,9.88,2.4],
+  [344.41,-29.62,1.2],[346.19,15.21,2.5],
+  [14.177,60.717,2.5],[21.454,60.235,2.7],[28.598,63.67,3.4],
+  [345.943,28.083,2.4],[3.309,15.183,2.8],
+  [305.557,40.257,2.2],[311.553,33.9703,2.5],[296.244,45.13,2.9],[292.68,27.96,3.1]
+];
+// Casiopea, el cuadrado de Pegaso y la cruz del Cisne.
+const SKY_EDGES=[[1,53],[53,3],[3,54],[54,55],[0,56],[56,52],[52,57],[57,0],[50,58],[58,61],[58,59],[58,60]];
+function drawSky(){
+  const canvas=document.getElementById('sky'), stage=document.querySelector('.clock-stage');
+  if(!canvas||!stage)return;
+  const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
+  const box=stage.getBoundingClientRect(),cx=box.left+box.width/2,cy=box.top+box.height/2;
+  const days=Date.now()/86400000+2440587.5-2451545;
+  const lst=(((280.46061837+360.98564736629*days+SKY_LON)%360)+360)%360*SKY_R;
+  const scale=Math.min(460,Math.max(360,Math.min(width,height)*.8)),projected=new Map();
+  for(let index=0;index<SKY_STARS.length;index++){
+    const [raDeg,decDeg,magnitude]=SKY_STARS[index],dec=decDeg*SKY_R,ha=lst-raDeg*SKY_R;
+    const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(SKY_LAT*SKY_R)*Math.sin(dec)+Math.cos(SKY_LAT*SKY_R)*Math.cos(dec)*Math.cos(ha))));
+    const altDeg=alt/SKY_R;if(altDeg<10)continue;
+    const cosAlt=Math.max(.0001,Math.cos(alt));
+    const sinAz=-Math.cos(dec)*Math.sin(ha)/cosAlt;
+    const cosAz=(Math.sin(dec)-Math.sin(alt)*Math.sin(SKY_LAT*SKY_R))/(cosAlt*Math.cos(SKY_LAT*SKY_R));
+    const az=Math.atan2(sinAz,cosAz),radius=Math.tan((90-altDeg)*SKY_R/2)*scale;
+    const x=cx+Math.sin(az)*radius,y=cy-Math.cos(az)*radius;
+    if(x>=-4&&x<=width+4&&y>=-4&&y<=height+4)projected.set(index,{x,y,magnitude});
+  }
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,Math.max(360,box.width*1.05),Math.max(360,box.height*1.05),0,0,Math.PI*2);ctx.clip();
+  ctx.globalAlpha=.3;ctx.strokeStyle='#b8d1ff';ctx.lineWidth=1.15;ctx.lineCap='round';
+  for(const [from,to] of SKY_EDGES){const a=projected.get(from),b=projected.get(to);if(!a||!b)continue;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+  for(const {x,y,magnitude} of projected.values()){
+    const radius=Math.max(.65,Math.min(2,1.7-(magnitude+1)*.22));
+    ctx.globalAlpha=Math.max(.45,Math.min(.9,.9-(magnitude+1.5)*.12));ctx.fillStyle='#dce8ff';
+    ctx.shadowColor='#b8d1ff';ctx.shadowBlur=magnitude<1?5:2;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
 let dim=0;
 const months=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const wk=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
@@ -804,6 +758,10 @@ document.getElementById('gcalOff').addEventListener('click',()=>{
 setInterval(()=>{if(gcTokenOk())gcRefresh();},600000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gcConnected()&&!gcTokenOk()&&gClient){gUserClick=false;try{gClient.requestAccessToken({prompt:''});}catch(e){}}});
 gcLoadCache();gcRender();gcLoadScript();
+drawSky();
+window.addEventListener('resize',drawSky);
+window.addEventListener('scroll',drawSky,{passive:true});
+setInterval(drawSky,60000);
 </script>
 </body>
 </html>

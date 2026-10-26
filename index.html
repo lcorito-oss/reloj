@@ -220,7 +220,7 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 /* Controles compactos: mitad de ancho y altura, con etiquetas legibles. */
 #tools button{width:50%;justify-self:center;min-height:36px;padding:3px 2px;gap:2px;border-radius:9px;font-size:.85rem}
 #tools button::after{font-size:.55rem}
-</style>
+#tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:min(100%,360px);margin-inline:auto}#tools button{border-radius:12px}#txt{grid-column:1/-1}</style>
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>

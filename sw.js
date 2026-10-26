@@ -1,30 +1,17 @@
-const CACHE='reloj-v23';
+const CACHE='reloj-v24';
 const FILES=['./','./index.html','./manifest.json','./icon.svg','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./assets/moon-surface.png'];
 
 self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));
+  event.waitUntil(caches.open(CACHE).then(cache=>Promise.all(FILES.map(f=>cache.add(f).catch(()=>{})))));
   self.skipWaiting();
 });
 
 self.addEventListener('activate',event=>{
-  event.waitUntil(Promise.all([
-    caches.delete('reloj-v8'),
-    caches.delete('reloj-v9'),
-    caches.delete('reloj-v10'),
-    caches.delete('reloj-v11'),
-    caches.delete('reloj-v12'),
-    caches.delete('reloj-v13'),
-    caches.delete('reloj-v14'),
-    caches.delete('reloj-v15'),
-    caches.delete('reloj-v16'),
-    caches.delete('reloj-v17'),
-    caches.delete('reloj-v18'),
-    caches.delete('reloj-v19'),
-    caches.delete('reloj-v20'),
-    caches.delete('reloj-v21'),
-    caches.delete('reloj-v22'),
-    self.clients.claim()
-  ]));
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch',event=>{
@@ -44,8 +31,11 @@ self.addEventListener('fetch',event=>{
       const cache=await caches.open(CACHE);
       const cached=await cache.match(request,{ignoreSearch:true});
       if(cached)return cached;
-      if(request.mode==='navigate')return cache.match('./index.html');
-      throw error;
+      if(request.mode==='navigate'){
+        const page=await cache.match('./index.html');
+        if(page)return page;
+      }
+      return Response.error();
     }
   })());
 });

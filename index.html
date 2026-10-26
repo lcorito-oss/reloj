@@ -169,6 +169,10 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 body{background-color:#050811;background-image:radial-gradient(ellipse at 50% 5%,#17223a 0%,#0a101d 48%,#050811 100%)}
 body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 1px at 7% 12%,#e7efff 99%,transparent),radial-gradient(1px 1px at 19% 67%,#cad8f4 99%,transparent),radial-gradient(1.3px 1.3px at 31% 28%,#fff 99%,transparent),radial-gradient(1px 1px at 44% 82%,#cbdcff 99%,transparent),radial-gradient(1.2px 1.2px at 57% 17%,#edf3ff 99%,transparent),radial-gradient(1px 1px at 68% 58%,#d8e2f8 99%,transparent),radial-gradient(1.4px 1.4px at 79% 31%,#fff 99%,transparent),radial-gradient(1px 1px at 92% 76%,#d6e3ff 99%,transparent),radial-gradient(ellipse at 18% 32%,#6378a512,transparent 42%),radial-gradient(ellipse at 81% 66%,#536caa10,transparent 44%);background-size:173px 191px,227px 239px,283px 269px,317px 331px,359px 307px,389px 367px,431px 397px,463px 443px,100% 100%,100% 100%;background-position:0 0,23px 41px,71px 5px,119px 69px,39px 101px,157px 19px,83px 177px,211px 131px,center,center;pointer-events:none}
 .app-shell{z-index:1}
+
+/* Mantén el reloj y la fase lunar flotando sobre el cielo, sin marco exterior */
+.clock-panel{padding:clamp(8px,1.6vw,18px) 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
+@media(max-width:700px){.clock-panel{gap:10px;padding:4px 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}}
 </style>
 </head>
 <body>

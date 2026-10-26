@@ -142,6 +142,28 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
 #tools.controls-visible,#tools:focus-within,#tools.edit{opacity:1;visibility:visible;pointer-events:auto}
 
 @media (pointer:coarse){#hS{filter:none}}
+
+/* Bloque lunar inspirado en la vista de Luna llena */
+.moon-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(115px,.7fr) minmax(0,1.3fr);align-items:center;gap:clamp(12px,2vw,24px);margin-top:24px;padding:clamp(16px,2.3vw,24px);overflow:hidden;border:1px solid #ffffff18;border-radius:24px;background:radial-gradient(ellipse at 22% 50%,#8295b425 0,transparent 43%),linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d}
+.moon-card::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.6;pointer-events:none;background-image:radial-gradient(circle at 8% 18%,#dce8ff 0 1px,transparent 1.6px),radial-gradient(circle at 28% 80%,#dce8ff 0 .8px,transparent 1.4px),radial-gradient(circle at 47% 12%,#dce8ff 0 .7px,transparent 1.5px),radial-gradient(circle at 89% 27%,#dce8ff 0 1px,transparent 1.8px),radial-gradient(circle at 74% 89%,#dce8ff 0 .8px,transparent 1.5px)}
+.moon-visual{display:grid;place-items:center;min-width:0;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#e7e3d180 0 28%,#d5d9e033 42%,transparent 72%)}
+.moon-symbol{display:block;width:min(100%,176px);height:auto;overflow:visible;filter:drop-shadow(0 0 10px #e5e3d566) drop-shadow(0 0 26px #d6d9df38)}
+.moon-photo{filter:brightness(1.12) contrast(1.04) saturate(.42)}
+.moon-content{min-width:0;padding:2px 0}
+.moon-label{display:block;color:#aebbd0;font-size:.66rem;font-weight:750;letter-spacing:.19em}
+.moon-name{display:block;margin-top:5px;color:#f2f4fa;font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.5vw,2.1rem);font-weight:500;letter-spacing:-.035em;line-height:1.12}
+.moon-date{margin-top:9px;color:#a1adbf;font-size:.82rem;line-height:1.4}
+.moon-place{margin-top:3px;color:#78869c;font-size:.75rem}
+.moon-stats{display:grid;gap:7px;margin-top:16px}
+.moon-stats div{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9ba8bc;font-size:.82rem}
+.moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums}
+.moon-illumination{display:none}
+.moon-age{display:none}
+.moon-meter{height:4px;margin-top:12px;background:#ffffff19}
+.moon-meter span{background:linear-gradient(90deg,#9aa9c2,#f4f2e9);box-shadow:0 0 10px #e4e6ed55}
+@media(max-width:700px){.moon-card{grid-template-columns:minmax(96px,.55fr) minmax(0,1.45fr);gap:13px;margin-top:18px;padding:16px}.moon-symbol{width:min(100%,142px)}}
+@media(max-width:390px){.moon-card{grid-template-columns:82px minmax(0,1fr);gap:10px;padding:13px;border-radius:19px}.moon-symbol{width:82px}.moon-name{font-size:1.35rem}.moon-date{font-size:.74rem}.moon-place{font-size:.68rem}.moon-stats{margin-top:12px}.moon-stats div{font-size:.73rem}}
+@media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
 </style>
 </head>
 <body>
@@ -257,20 +279,27 @@ h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:nor
     </div>
     <div class="clock-details">
       <div id="info"></div>
-      <div class="moon-card" id="moon-phase" role="group" aria-label="Fase lunar">
-        <svg class="moon-symbol" id="moon-icon" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="#111827"/><path id="moon-lit" fill="#f4f6fa"/><circle cx="50" cy="50" r="44" fill="none" stroke="#f4f6fa" stroke-width="2"/></svg>
-        <div class="moon-content">
-          <div class="moon-header">
-            <span class="moon-label">FASE LUNAR</span>
-            <span class="moon-illumination" id="moon-illumination">—% iluminada</span>
-          </div>
-          <strong class="moon-name" id="moon-name">Calculando fase…</strong>
-          <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando">
-            <span id="moon-meter-fill"></span>
-          </div>
-          <p class="moon-age" id="moon-age"></p>
+      <section class="moon-card" id="moon-phase" aria-label="Información de la Luna">
+        <div class="moon-visual" aria-hidden="true">
+          <svg class="moon-symbol" id="moon-icon" viewBox="0 0 100 100">
+            <defs><clipPath id="moon-clip"><path id="moon-lit"/></clipPath></defs>
+            <circle cx="50" cy="50" r="44" fill="#101521"/>
+            <image class="moon-photo" href="assets/moon-surface.png" x="6" y="6" width="88" height="88" preserveAspectRatio="xMidYMid slice" clip-path="url(#moon-clip)"/>
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#f4f6fa" stroke-opacity=".65" stroke-width=".8"/>
+          </svg>
         </div>
-      </div>
+        <div class="moon-content">
+          <span class="moon-label">CIELO DE HOY</span>
+          <strong class="moon-name" id="moon-name">Calculando fase…</strong>
+          <p class="moon-date" id="moon-date"></p>
+          <p class="moon-place">San Francisco del Oro · Chihuahua</p>
+          <div class="moon-stats">
+            <div><span>Iluminación</span><strong id="moon-illumination">—%</strong></div>
+            <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
+          </div>
+          <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span></div>
+        </div>
+      </section>
       <div id="tools">
   <button id="bTheme" type="button" title="Cambiar paleta" aria-label="Cambiar paleta de colores" data-label="Color">🎨</button>
   <button id="bSound" type="button" title="Activar sonido" aria-label="Activar sonido tic tac" data-label="Sonido">🔇</button>
@@ -361,6 +390,7 @@ function updateText(){
 const MOON_CYCLE_DAYS=29.530588853;
 const REFERENCE_NEW_MOON=Date.UTC(2000,0,6,18,14);
 function updateMoonPhase(){
+  const now=new Date();
   const days=(Date.now()-REFERENCE_NEW_MOON)/86400000;
   const phase=((days/MOON_CYCLE_DAYS)%1+1)%1;
   const age=phase*MOON_CYCLE_DAYS;
@@ -380,8 +410,9 @@ function updateMoonPhase(){
   const moonPath=`M ${center} ${center-radius} A ${radius} ${radius} 0 0 ${outerSweep} ${center} ${center+radius} A ${terminatorRadius} ${radius} 0 0 ${innerSweep} ${center} ${center-radius} Z`;
   document.getElementById('moon-lit').setAttribute('d',moonPath);
   document.getElementById('moon-name').textContent=name;
-  document.getElementById('moon-illumination').textContent=`${illumination}% iluminada`;
-  document.getElementById('moon-age').textContent=`Edad aproximada: ${age.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} días`;
+  document.getElementById('moon-illumination').textContent=`${illumination}%`;
+  document.getElementById('moon-age').textContent=`${age.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} días`;
+  document.getElementById('moon-date').textContent=new Intl.DateTimeFormat('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now);
   const meter=document.getElementById('moon-meter');
   meter.setAttribute('aria-valuenow',String(illumination));
   meter.setAttribute('aria-valuetext',`${illumination}% iluminada`);

@@ -191,6 +191,9 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 
 /* fecha centrada sobre la tarjeta Cielo de hoy */
 #info{text-align:center}
+.moon-meter{position:relative}
+.moon-meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:#050811;border-radius:inherit;transition:width .5s ease}
+@media(prefers-reduced-motion:reduce){.moon-meter i{transition:none}}
 </style>
 </head>
 <body>
@@ -418,7 +421,7 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
             <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
             <div><span>Fase</span><strong id="moon-trend">—</strong></div>
           </div>
-          <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span></div>
+          <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span><i id="moon-meter-dark"></i></div>
         </div>
       </section>
       <div id="tools">
@@ -537,7 +540,8 @@ function updateMoonPhase(){
   const meter=document.getElementById('moon-meter');
   meter.setAttribute('aria-valuenow',String(illumination));
   meter.setAttribute('aria-valuetext',`${illumination}% iluminada`);
-  document.getElementById('moon-meter-fill').style.width=`${illumination}%`;
+  document.getElementById('moon-meter-fill').style.width=waxing?`${illumination}%`:'100%';
+  document.getElementById('moon-meter-dark').style.width=waxing?'0%':`${100-illumination}%`;
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES = [

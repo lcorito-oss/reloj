@@ -300,6 +300,7 @@ body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 
           <div class="moon-stats">
             <div><span>Iluminación</span><strong id="moon-illumination">—%</strong></div>
             <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
+            <div><span>Fase</span><strong id="moon-trend">—</strong></div>
           </div>
           <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span></div>
         </div>
@@ -414,6 +415,7 @@ function updateMoonPhase(){
   const moonPath=`M ${center} ${center-radius} A ${radius} ${radius} 0 0 ${outerSweep} ${center} ${center+radius} A ${terminatorRadius} ${radius} 0 0 ${innerSweep} ${center} ${center-radius} Z`;
   document.getElementById('moon-lit').setAttribute('d',moonPath);
   document.getElementById('moon-name').textContent=name;
+  document.getElementById('moon-trend').textContent=phase<.5?'Creciente':'Menguante';
   document.getElementById('moon-illumination').textContent=`${illumination}%`;
   document.getElementById('moon-age').textContent=`${age.toLocaleString('es',{minimumFractionDigits:1,maximumFractionDigits:1})} días`;
   const meter=document.getElementById('moon-meter');

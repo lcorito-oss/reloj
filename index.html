@@ -211,6 +211,19 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 .gcal-msg{margin:10px 0 0;color:#9ba8bc;font-size:.78rem}
 .gcal-msg:empty{display:none}
 #rDay text.ev:not(.on){opacity:.95;filter:none;fill:#ffd27a;font-size:8.5px;font-weight:700}
+
+/* espacios equilibrados: anillos · fecha · tarjeta */
+#info{min-height:0;margin:0;line-height:1.3}
+.moon-card{margin-top:18px}
+@media(max-width:700px){.clock-panel{gap:0}.clock-details{padding-top:0}#info{min-height:0;margin-top:18px}.moon-card{margin-top:18px}}
+/* próximos eventos: más compacto */
+.gcal-card{padding:11px 14px;border-radius:20px}
+.gcal-btn{padding:4px 10px;font-size:.66rem}
+.gcal-list{margin-top:8px;gap:5px}
+.gcal-list li{grid-template-columns:72px minmax(0,1fr) auto;gap:8px;font-size:.78rem}
+.gcal-when{font-size:.68rem}
+.gcal-sub{font-size:.68rem}
+.gcal-msg{margin-top:8px;font-size:.72rem}
 </style>
 </head>
 <body>

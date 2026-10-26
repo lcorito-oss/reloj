@@ -184,7 +184,7 @@ body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 
 /* Una sola capa de cielo: los nodos y las líneas usan el mismo SVG y coordenadas. */
 body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
 .constellation-map{opacity:1}
-.constellation-lines{fill:none;stroke:#a9bfdf;stroke-opacity:.24;stroke-width:1.05;stroke-linecap:round;stroke-linejoin:round}
+.constellation-lines{fill:none;stroke:#a9bfdf;stroke-opacity:.34;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round}.constellation-lines path{vector-effect:non-scaling-stroke}
 .constellation-lines circle{fill:#dbe7ff;stroke:none;opacity:.88}
 
 .background-stars circle{fill:#e4edff;stroke:none;opacity:.78}
@@ -227,7 +227,7 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 </style>
 </head>
 <body>
-<svg class="constellation-map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+<svg class="constellation-map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
   
     <g class="constellation-lines">
     <g class="constellation">
@@ -243,8 +243,8 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
       
     </g>
     <g class="constellation">
-      <path d="M173 521 L287 612 L406 536 L505 632 L389 708 L287 612 L300 461"/>
-      <circle cx="173" cy="521" r="2.2"/><circle cx="287" cy="612" r="2.2"/><circle cx="406" cy="536" r="2.2"/><circle cx="505" cy="632" r="2.2"/><circle cx="389" cy="708" r="2.2"/><circle cx="300" cy="461" r="2.2"/>
+      <path d="M400 475 L460 540 L520 690 M460 540 L595 610 M460 540 L365 550"/>
+      <circle cx="400" cy="475" r="2.2"/><circle cx="460" cy="540" r="2.2"/><circle cx="520" cy="690" r="2.2"/><circle cx="595" cy="610" r="2.2"/><circle cx="365" cy="550" r="2.2"/>
       
       
     </g>

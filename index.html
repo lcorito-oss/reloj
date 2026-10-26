@@ -173,9 +173,34 @@ body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 
 /* Mantén el reloj y la fase lunar flotando sobre el cielo, sin marco exterior */
 .clock-panel{padding:clamp(8px,1.6vw,18px) 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
 @media(max-width:700px){.clock-panel{gap:10px;padding:4px 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}}
+
+/* Trazos suaves de constelaciones otoñales visibles desde latitudes medias del norte */
+.constellation-map{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;max-width:none;max-height:none;pointer-events:none;opacity:.27}
+.constellation-lines{fill:#c5d5f2;stroke:#a9bfdf;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.constellation-lines text{fill:#b8c8e3;stroke:none;font:10px ui-sans-serif,system-ui,sans-serif;letter-spacing:2px;text-anchor:middle;opacity:.82}
+.app-shell{z-index:2}
 </style>
 </head>
-<body>
+<body>\n<svg class="constellation-map" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <g class="constellation-lines">
+    <g class="constellation">
+      <path d="M145 171 L225 119 L300 178 L378 125 L455 185"/>
+      <circle cx="145" cy="171" r="2.6"/><circle cx="225" cy="119" r="2.1"/><circle cx="300" cy="178" r="2.8"/><circle cx="378" cy="125" r="2.2"/><circle cx="455" cy="185" r="2.5"/>
+      <text x="300" y="214">CASIOPEA</text>
+    </g>
+    <g class="constellation">
+      <path d="M720 188 L850 166 L878 297 L735 321 Z M850 166 L925 103 L1000 82 L1065 118"/>
+      <circle cx="720" cy="188" r="2.7"/><circle cx="850" cy="166" r="2.2"/><circle cx="878" cy="297" r="2.5"/><circle cx="735" cy="321" r="2.1"/><circle cx="925" cy="103" r="2.4"/><circle cx="1000" cy="82" r="2"/><circle cx="1065" cy="118" r="2.3"/>
+      <text x="882" y="354">PEGASO</text>
+    </g>
+    <g class="constellation">
+      <path d="M173 521 L287 612 L406 536 L505 632 L389 708 L287 612 L300 461"/>
+      <circle cx="173" cy="521" r="2.6"/><circle cx="287" cy="612" r="2.4"/><circle cx="406" cy="536" r="2.7"/><circle cx="505" cy="632" r="2.4"/><circle cx="389" cy="708" r="2.2"/><circle cx="300" cy="461" r="2.6"/>
+      <text x="348" y="752">CISNE</text>
+    </g>
+  </g>
+</svg>
+
 <main class="app-shell">
   <section class="clock-panel" aria-label="Reloj y calendario circular">
     <div class="clock-stage">
@@ -300,7 +325,7 @@ body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 
         <div class="moon-content">
           <span class="moon-label">CIELO DE HOY</span>
           <strong class="moon-name" id="moon-name">Calculando fase…</strong>
-          <p class="moon-place">San Francisco del Oro · Chihuahua</p>
+          
           <div class="moon-stats">
             <div><span>Iluminación</span><strong id="moon-illumination">—%</strong></div>
             <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>

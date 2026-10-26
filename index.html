@@ -401,15 +401,15 @@ const SKY_STARS=[
 // Casiopea, el cuadrado de Pegaso y la cruz del Cisne.
 const SKY_EDGES=[[1,53],[53,3],[3,54],[54,55],[0,56],[56,52],[52,57],[57,0],[50,58],[58,61],[58,59],[58,60]];
 function drawSky(){
-  const canvas=document.getElementById('sky'), stage=document.querySelector('.clock-stage');
-  if(!canvas||!stage)return;
+  const canvas=document.getElementById('sky');
+  if(!canvas)return;
   const width=window.innerWidth,height=window.innerHeight,dpr=Math.min(window.devicePixelRatio||1,2);
   canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
   const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
-  const box=stage.getBoundingClientRect(),cx=box.left+box.width/2,cy=box.top+box.height/2;
+  const cx=width/2,cy=height/2;
   const days=Date.now()/86400000+2440587.5-2451545;
   const lst=(((280.46061837+360.98564736629*days+SKY_LON)%360)+360)%360*SKY_R;
-  const scale=Math.min(320,Math.max(240,Math.min(width,height)*.58)),projected=new Map();
+  const horizonRadius=Math.tan(85*SKY_R/2),projected=new Map();
   for(let index=0;index<SKY_STARS.length;index++){
     const [raDeg,decDeg,magnitude]=SKY_STARS[index],dec=decDeg*SKY_R,ha=lst-raDeg*SKY_R;
     const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(SKY_LAT*SKY_R)*Math.sin(dec)+Math.cos(SKY_LAT*SKY_R)*Math.cos(dec)*Math.cos(ha))));
@@ -417,11 +417,11 @@ function drawSky(){
     const cosAlt=Math.max(.0001,Math.cos(alt));
     const sinAz=-Math.cos(dec)*Math.sin(ha)/cosAlt;
     const cosAz=(Math.sin(dec)-Math.sin(alt)*Math.sin(SKY_LAT*SKY_R))/(cosAlt*Math.cos(SKY_LAT*SKY_R));
-    const az=Math.atan2(sinAz,cosAz),radius=Math.tan((90-altDeg)*SKY_R/2)*scale;
-    const x=cx+Math.sin(az)*radius,y=cy-Math.cos(az)*radius;
-    if(x>=-4&&x<=width+4&&y>=-4&&y<=height+4)projected.set(index,{x,y,magnitude});
+    const az=Math.atan2(sinAz,cosAz),radius=Math.tan((90-altDeg)*SKY_R/2)/horizonRadius;
+    const x=cx+Math.sin(az)*radius*width/2,y=cy-Math.cos(az)*radius*height/2;
+    projected.set(index,{x,y,magnitude});
   }
-  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,Math.max(360,box.width*1.05),Math.max(360,box.height*1.05),0,0,Math.PI*2);ctx.clip();
+  ctx.save();
   ctx.globalAlpha=.3;ctx.strokeStyle='#b8d1ff';ctx.lineWidth=1.15;ctx.lineCap='round';
   for(const [from,to] of SKY_EDGES){const a=projected.get(from),b=projected.get(to);if(!a||!b)continue;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
   for(const {x,y,magnitude} of projected.values()){

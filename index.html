@@ -413,7 +413,7 @@ function drawSky(){
   for(let index=0;index<SKY_STARS.length;index++){
     const [raDeg,decDeg,magnitude]=SKY_STARS[index],dec=decDeg*SKY_R,ha=lst-raDeg*SKY_R;
     const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(SKY_LAT*SKY_R)*Math.sin(dec)+Math.cos(SKY_LAT*SKY_R)*Math.cos(dec)*Math.cos(ha))));
-    const altDeg=alt/SKY_R;if(altDeg<10)continue;
+    const altDeg=alt/SKY_R;if(altDeg<5)continue;
     const cosAlt=Math.max(.0001,Math.cos(alt));
     const sinAz=-Math.cos(dec)*Math.sin(ha)/cosAlt;
     const cosAz=(Math.sin(dec)-Math.sin(alt)*Math.sin(SKY_LAT*SKY_R))/(cosAlt*Math.cos(SKY_LAT*SKY_R));

@@ -405,7 +405,7 @@ function drawSky(){
   const box=stage.getBoundingClientRect(),cx=box.left+box.width/2,cy=box.top+box.height/2;
   const days=Date.now()/86400000+2440587.5-2451545;
   const lst=(((280.46061837+360.98564736629*days+SKY_LON)%360)+360)%360*SKY_R;
-  const scale=Math.min(210,Math.max(150,Math.min(width,height)*.34)),projected=new Map();
+  const scale=Math.min(460,Math.max(360,Math.min(width,height)*.8)),projected=new Map();
   for(let index=0;index<SKY_STARS.length;index++){
     const [raDeg,decDeg,magnitude]=SKY_STARS[index],dec=decDeg*SKY_R,ha=lst-raDeg*SKY_R;
     const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(SKY_LAT*SKY_R)*Math.sin(dec)+Math.cos(SKY_LAT*SKY_R)*Math.cos(dec)*Math.cos(ha))));
@@ -417,7 +417,7 @@ function drawSky(){
     const x=cx+Math.sin(az)*radius,y=cy-Math.cos(az)*radius;
     if(x>=-4&&x<=width+4&&y>=-4&&y<=height+4)projected.set(index,{x,y,magnitude});
   }
-  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,Math.max(190,box.width*.62),Math.max(190,box.height*.62),0,0,Math.PI*2);ctx.clip();
+  ctx.save();ctx.beginPath();ctx.ellipse(cx,cy,Math.max(360,box.width*1.05),Math.max(360,box.height*1.05),0,0,Math.PI*2);ctx.clip();
   ctx.globalAlpha=.3;ctx.strokeStyle='#b8d1ff';ctx.lineWidth=1.15;ctx.lineCap='round';
   for(const [from,to] of SKY_EDGES){const a=projected.get(from),b=projected.get(to);if(!a||!b)continue;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
   for(const {x,y,magnitude} of projected.values()){

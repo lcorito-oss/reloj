@@ -454,9 +454,9 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
           <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span><i id="moon-meter-dark"></i></div>
         </div>
       </section>
-      <section class="gcal-card" id="gcal" aria-label="Próximos eventos de Google Calendar">
+      <section class="gcal-card" id="gcal" aria-label="Eventos de hoy y mañana de Google Calendar">
         <div class="gcal-head">
-          <span class="moon-label">PRÓXIMOS EVENTOS</span>
+          <span class="moon-label">HOY Y MAÑANA</span>
           <span class="gcal-actions"><button id="gcalBtn" class="gcal-btn" type="button">Conectar Google Calendar</button><button id="gcalOff" class="gcal-btn gcal-off" type="button" hidden>Salir</button></span>
         </div>
         <ul id="gcalList" class="gcal-list"></ul>
@@ -713,7 +713,7 @@ function gcRender(){
   btn.textContent=conn?'Actualizar':'Conectar Google Calendar';
   off.hidden=!conn;
   const now=Date.now(), t0=new Date();t0.setHours(0,0,0,0);
-  const up=(gEvents||[]).filter(e=>e.e>now||(e.e===e.s&&e.s>=t0.getTime())).slice(0,5);
+  const lim=t0.getTime()+2*864e5, up=(gEvents||[]).filter(e=>(e.e>now||(e.e===e.s&&e.s>=t0.getTime()))&&e.s<lim).slice(0,8);
   up.forEach(ev=>{
     const li=document.createElement('li'), w=document.createElement('span'), ti=document.createElement('span'), sub=document.createElement('span');
     const sd=new Date(ev.s), sday=new Date(sd.getFullYear(),sd.getMonth(),sd.getDate()), diff=Math.round((sday-t0)/864e5);
@@ -724,7 +724,7 @@ function gcRender(){
     li.appendChild(w);li.appendChild(ti);li.appendChild(sub);list.appendChild(li);
   });
   if(!conn)gcMsg('Conecta tu cuenta para ver tus citas y cumpleaños.');
-  else if(!up.length)gcMsg('Sin eventos en los próximos días.');
+  else if(!up.length)gcMsg('Sin eventos hoy ni mañana.');
   else gcMsg('');
   markEventDays();
 }

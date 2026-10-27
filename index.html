@@ -1148,7 +1148,7 @@ function drawSky(){
     const p=projectEquatorial(body.ra,body.dec,body.kind==="moon");if(!p)continue;
     ctx.globalAlpha=p.below?.42:.96;ctx.fillStyle=body.color;ctx.shadowColor=body.color;ctx.shadowBlur=body.kind==="moon"?9:6;
     ctx.beginPath();ctx.arc(p.x,p.y,body.kind==="moon"?4.4:3.5,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;ctx.font="600 12px system-ui";ctx.fillText(p.below?"Luna (bajo horizonte)":body.name,p.x+7,p.y-6);
+    ctx.shadowBlur=0;
   }
   for(const galaxy of SKY_GALAXIES){
     const p=projectEquatorial(galaxy.ra,galaxy.dec);if(!p)continue;

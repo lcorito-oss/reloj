@@ -1075,16 +1075,16 @@ const SKY_STARS = [
   [102395,311.2398,-66.2032,3.42],
 ];
 
-// Posiciones ecuatoriales aproximadas en JD 2444944.75; solo se dibujan si están sobre el horizonte.
+// Posiciones ecuatoriales aproximadas en JD 2444945.0; solo se dibujan si están sobre el horizonte.
 const SKY_BODIES = [
-  {name:"Mercurio",ra:250.262,dec:-22.920,color:"#cbd3e3",kind:"planet"},
-  {name:"Venus",ra:301.063,dec:-22.990,color:"#ffe6a6",kind:"planet"},
-  {name:"Marte",ra:176.675,dec:3.614,color:"#ff927d",kind:"planet"},
-  {name:"Júpiter",ra:210.166,dec:-11.102,color:"#f3d09a",kind:"planet"},
-  {name:"Saturno",ra:199.375,dec:-5.666,color:"#dfc88d",kind:"planet"},
-  {name:"Urano",ra:239.300,dec:-20.273,color:"#a8e5e1",kind:"planet"},
-  {name:"Neptuno",ra:264.041,dec:-22.071,color:"#9eb7ff",kind:"planet"},
-  {name:"Luna",ra:6.741,dec:-2.375,color:"#fff1c8",kind:"moon"}
+  {name:"Mercurio",ra:250.6809,dec:-22.9976,color:"#cbd3e3",kind:"planet"},
+  {name:"Venus",ra:301.2532,dec:-22.9305,color:"#ffe6a6",kind:"planet"},
+  {name:"Marte",ra:176.7908,dec:3.5677,color:"#ff927d",kind:"planet"},
+  {name:"Júpiter",ra:210.2106,dec:-11.1180,color:"#f3d09a",kind:"planet"},
+  {name:"Saturno",ra:199.3960,dec:-5.6732,color:"#dfc88d",kind:"planet"},
+  {name:"Urano",ra:239.3155,dec:-20.2761,color:"#a8e5e1",kind:"planet"},
+  {name:"Neptuno",ra:264.0515,dec:-22.0715,color:"#9eb7ff",kind:"planet"},
+  {name:"Luna",ra:9.9812,dec:-1.0861,color:"#fff1c8",kind:"moon"}
 ];
 const SKY_GALAXIES = [
   {name:"M31 Andrómeda",ra:10.6847,dec:41.2692},
@@ -1104,7 +1104,7 @@ function drawSky(){
   canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
   const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
   const cx=width/2,cy=height/2;
-  const days=2444944.75-2451545; // Día juliano del cielo de referencia.
+  const days=2444945.0-2451545; // Día juliano del cielo de referencia.
   const lst=(((280.46061837+360.98564736629*days+SKY_LON)%360)+360)%360*SKY_R;
   const horizonRadius=Math.tan(90*SKY_R/2),projected=new Map();
   for(const [hip,raDeg,decDeg,magnitude] of SKY_STARS){

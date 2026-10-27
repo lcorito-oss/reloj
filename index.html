@@ -1154,7 +1154,6 @@ function drawSky(){
     const p=projectEquatorial(galaxy.ra,galaxy.dec);if(!p)continue;
     ctx.globalAlpha=.82;ctx.strokeStyle="#d4c7ff";ctx.lineWidth=1;
     ctx.beginPath();ctx.ellipse(p.x,p.y,4.2,2.7,-.35,0,Math.PI*2);ctx.stroke();
-    ctx.font="500 11px system-ui";ctx.fillStyle="#d4c7ff";ctx.fillText(galaxy.name,p.x+7,p.y-5);
   }
   for(const {x,y,magnitude} of projected.values()){
     const radius=Math.max(.65,Math.min(2,1.7-(magnitude+1)*.22));

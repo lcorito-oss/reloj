@@ -1120,17 +1120,17 @@ function drawSky(){
   }
   ctx.save();
   const R=SKY_R,LAT=SKY_LAT;
-  const projectEquatorial=(raDeg,decDeg)=>{
+  const projectEquatorial=(raDeg,decDeg,includeBelow=false)=>{
     const dec=decDeg*R,ha=lst-raDeg*R;
     const alt=Math.asin(Math.max(-1,Math.min(1,Math.sin(LAT*R)*Math.sin(dec)+Math.cos(LAT*R)*Math.cos(dec)*Math.cos(ha))));
-    if(alt<0)return null;
+    const below=alt<0;if(below&&!includeBelow)return null;
     const cosAlt=Math.max(.0001,Math.cos(alt));
     const sinAz=-Math.cos(dec)*Math.sin(ha)/cosAlt;
     const cosAz=(Math.sin(dec)-Math.sin(alt)*Math.sin(LAT*R))/(cosAlt*Math.cos(LAT*R));
-    const az=Math.atan2(sinAz,cosAz),radius=Math.tan((90-alt/R)*R/2)/horizonRadius;
+    const az=Math.atan2(sinAz,cosAz),visibleAlt=Math.max(0,alt/R),radius=Math.tan((90-visibleAlt)*R/2)/horizonRadius;
     const x=cx+Math.sin(az)*radius*width/2,y=cy-Math.cos(az)*radius*height/2;
     if(x < -4 || x > width+4 || y < -4 || y > height+4)return null;
-    return {x,y,alt:alt/R};
+    return {x,y,alt:alt/R,below};
   };
   // Banda difusa de la Vía Láctea: puntos del plano galáctico transformados a J2000.
   for(let b=-12;b<=12;b+=3)for(let l=0;l<360;l+=4){
@@ -1145,10 +1145,10 @@ function drawSky(){
   }
   // Planetas y satélite natural (Luna), más galaxias destacadas por encima del horizonte.
   for(const body of SKY_BODIES){
-    const p=projectEquatorial(body.ra,body.dec);if(!p)continue;
-    ctx.globalAlpha=.96;ctx.fillStyle=body.color;ctx.shadowColor=body.color;ctx.shadowBlur=body.kind==="moon"?9:6;
+    const p=projectEquatorial(body.ra,body.dec,body.kind==="moon");if(!p)continue;
+    ctx.globalAlpha=p.below?.42:.96;ctx.fillStyle=body.color;ctx.shadowColor=body.color;ctx.shadowBlur=body.kind==="moon"?9:6;
     ctx.beginPath();ctx.arc(p.x,p.y,body.kind==="moon"?4.4:3.5,0,Math.PI*2);ctx.fill();
-    ctx.shadowBlur=0;ctx.font="600 12px system-ui";ctx.fillText(body.name,p.x+7,p.y-6);
+    ctx.shadowBlur=0;ctx.font="600 12px system-ui";ctx.fillText(p.below?"Luna (bajo horizonte)":body.name,p.x+7,p.y-6);
   }
   for(const galaxy of SKY_GALAXIES){
     const p=projectEquatorial(galaxy.ra,galaxy.dec);if(!p)continue;

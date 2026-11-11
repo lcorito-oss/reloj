@@ -1238,6 +1238,8 @@ function updateText(){
 }
 const MOON_CYCLE_DAYS=29.530588853;
 const REFERENCE_NEW_MOON=Date.UTC(2000,0,6,18,14);
+// Nombres tradicionales de la luna llena, por mes de la luna llena (como en luna-hoy).
+const FULL_MOON_NAMES=['Luna del Lobo','Luna de la Nieve','Luna del Gusano','Luna Rosa','Luna de la Flor','Luna de la Fresa','Luna del Ciervo','Luna del Esturión','Luna del Maíz','Luna del Cazador','Luna del Castor','Luna Fría'];
 function updateMoonPhase(){
   const now=new Date();
   const days=(Date.now()-REFERENCE_NEW_MOON)/86400000;
@@ -1249,7 +1251,7 @@ function updateMoonPhase(){
   else if(phase<.22){name='Luna creciente';}
   else if(phase<.28){name='Cuarto creciente';}
   else if(phase<.47){name='Gibosa creciente';}
-  else if(phase<.53){name='Luna llena';}
+  else if(phase<.53){const fullMoon=new Date(REFERENCE_NEW_MOON+(Math.floor(days/MOON_CYCLE_DAYS)+.5)*MOON_CYCLE_DAYS*86400000);name='Luna llena · '+FULL_MOON_NAMES[fullMoon.getMonth()];}
   else if(phase<.72){name='Gibosa menguante';}
   else if(phase<.78){name='Cuarto menguante';}
   else{name='Luna menguante';}

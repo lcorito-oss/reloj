@@ -202,6 +202,8 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
 .gcal-sub{color:#8d9bb2;font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap}
 .gcal-msg{margin:10px 0 0;color:#9ba8bc;font-size:.78rem}
 .gcal-msg:empty{display:none}
+.gcal-msg.err{color:#ffb4b4}
+.gcal-sub{overflow:hidden;text-overflow:ellipsis;max-width:130px}
 #rDay text.ev:not(.on){opacity:.95;filter:none;fill:#ffd27a;font-size:8.5px;font-weight:700}
 
 /* espacios equilibrados: anillos · fecha · tarjeta */
@@ -361,7 +363,7 @@ body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,trans
       <section class="gcal-card" id="gcal" aria-label="Eventos de hoy y mañana de Google Calendar">
         <div class="gcal-head">
           <span class="moon-label">HOY Y MAÑANA</span>
-          <span class="gcal-actions"><button id="gcalBtn" class="gcal-btn" type="button">Conectar Google Calendar</button><button id="gcalOff" class="gcal-btn gcal-off" type="button" hidden>Salir</button></span>
+          <span class="gcal-actions"><button id="gcalBtn" class="gcal-btn" type="button">Conectar Google Calendar</button><button id="gcalRetry" class="gcal-btn" type="button" hidden>Reintentar</button><button id="gcalOff" class="gcal-btn gcal-off" type="button" hidden>Salir</button></span>
         </div>
         <ul id="gcalList" class="gcal-list"></ul>
         <p id="gcalMsg" class="gcal-msg" aria-live="polite"></p>
@@ -1387,20 +1389,33 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catc
 /* ---- Google Calendar (solo lectura) ---- */
 var GC_ID='270606632725-jh02rpeacl0qth2la3tfkg9ji5uqlt5f.apps.googleusercontent.com';
 var GC_SCOPE='https://www.googleapis.com/auth/calendar.readonly';
-var gEvents=[], gToken=null, gTokenExp=0, gClient=null, gBusy=false, gUserClick=false;
+var gEvents=[], gToken=null, gTokenExp=0, gClient=null, gBusy=false, gUserClick=false, gCacheAt=0, gLastError=null, gExpired=false;
 function gcPd(s){const p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
 function gcMsg(t){document.getElementById('gcalMsg').textContent=t||'';}
-function gcLoadCache(){try{const c=JSON.parse(localStorage.getItem('relojGcalEvents')||'null');if(c&&Array.isArray(c.events))gEvents=c.events;}catch(e){}}
-function gcSaveCache(){try{localStorage.setItem('relojGcalEvents',JSON.stringify({events:gEvents,at:Date.now()}));}catch(e){}}
+function gcLoadCache(){try{const c=JSON.parse(localStorage.getItem('relojGcalEvents')||'null');if(c&&Array.isArray(c.events)){gEvents=c.events;gCacheAt=c.at||0;}}catch(e){}}
+function gcSaveCache(){try{gCacheAt=Date.now();localStorage.setItem('relojGcalEvents',JSON.stringify({events:gEvents,at:gCacheAt}));}catch(e){}}
 function gcConnected(){try{return localStorage.getItem('relojGcal')==='1';}catch(e){return false;}}
 function gcTokenOk(){return !!gToken&&Date.now()<gTokenExp-60000;}
+function gcAgeText(){if(!gCacheAt)return '';const m=Math.floor((Date.now()-gCacheAt)/60000);if(m<1)return 'ahora mismo';if(m<60)return 'hace '+m+' min';return 'hace '+Math.floor(m/60)+' h';}
+function gcCacheTime(){if(!gCacheAt)return '';return new Date(gCacheAt).toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});}
+function gcExpire(){gToken=null;gTokenExp=0;gExpired=true;gBusy=false;gcRender();}
+function gcStatus(up){
+  if(!gcConnected())return 'Conecta tu cuenta para ver tus citas y cumpleaños.';
+  if(gExpired)return 'Sesión expirada, vuelve a conectar.';
+  if(gBusy)return 'Cargando…';
+  if(!navigator.onLine)return 'Sin conexión, mostrando datos de las '+gcCacheTime()+'.';
+  if(gLastError)return 'Error al cargar, reintentar.';
+  if(!up.length)return 'Sin eventos hoy ni mañana.'+(gCacheAt?' · Datos de las '+gcCacheTime()+'.':'');
+  return 'Actualizado '+gcAgeText()+'.';
+}
 
 function gcRender(){
-  const list=document.getElementById('gcalList'), btn=document.getElementById('gcalBtn'), off=document.getElementById('gcalOff');
+  const list=document.getElementById('gcalList'), btn=document.getElementById('gcalBtn'), off=document.getElementById('gcalOff'), retry=document.getElementById('gcalRetry');
   list.textContent='';
   const conn=gcConnected();
-  btn.textContent=conn?'Actualizar':'Conectar Google Calendar';
+  btn.textContent=!conn?'Conectar Google Calendar':gExpired?'Volver a conectar':'Actualizar';
   off.hidden=!conn;
+  retry.hidden=!gLastError;
   const now=Date.now(), t0=new Date();t0.setHours(0,0,0,0);
   const lim=t0.getTime()+2*864e5, up=(gEvents||[]).filter(e=>(e.e>now||(e.e===e.s&&e.s>=t0.getTime()))&&e.s<lim).slice(0,8);
   up.forEach(ev=>{
@@ -1409,15 +1424,14 @@ function gcRender(){
     w.className='gcal-when';
     w.textContent=diff<=0?'Hoy':diff===1?'Mañana':sd.toLocaleDateString('es',{weekday:'short',day:'numeric',month:'short'}).replace('.','');
     ti.className='gcal-title';ti.textContent=ev.t;
-    sub.className='gcal-sub';sub.textContent=ev.a?'':sd.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'});
+    sub.className='gcal-sub';
+    sub.textContent=ev.l?(ev.a?ev.l:sd.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'})+' · '+ev.l):(ev.a?'':sd.toLocaleTimeString('es',{hour:'numeric',minute:'2-digit'}));
+    li.title=ev.l||'';
     li.appendChild(w);li.appendChild(ti);li.appendChild(sub);list.appendChild(li);
   });
-  if(!conn)gcMsg('Conecta tu cuenta para ver tus citas y cumpleaños.');
-  else if(!up.length)gcMsg('Sin eventos hoy ni mañana.');
-  else gcMsg('');
+  gcMsg(gcStatus(up));
   markEventDays();
 }
-
 function markEventDays(){
   const g=document.getElementById('rDay');if(!g)return;
   const d=new Date(),y=d.getFullYear(),m=d.getMonth(),n=new Date(y,m+1,0).getDate(),days=new Set();
@@ -1437,11 +1451,11 @@ async function gcFetchAll(){
   const cals=((await lr.json()).items||[]).filter(c=>c.selected||c.primary), out=[];
   await Promise.all(cals.map(async c=>{
     const u='https://www.googleapis.com/calendar/v3/calendars/'+encodeURIComponent(c.id)+'/events?singleEvents=true&orderBy=startTime&maxResults=150&timeMin='+encodeURIComponent(min.toISOString())+'&timeMax='+encodeURIComponent(max.toISOString());
-    const r=await fetch(u,{headers:h});if(!r.ok)return;
+    const r=await fetch(u,{headers:h});if(r.status===401){gToken=null;throw new Error('auth');}if(!r.ok)return;
     ((await r.json()).items||[]).forEach(ev=>{
       if(ev.status==='cancelled'||!ev.start)return;
       const ad=!!ev.start.date, s=ad?gcPd(ev.start.date):new Date(ev.start.dateTime), e=ad?gcPd(ev.end.date):new Date(ev.end.dateTime);
-      out.push({t:ev.summary||'(Sin título)',s:+s,e:+e,a:ad});
+      out.push({t:ev.summary||'(Sin título)',s:+s,e:+e,a:ad,l:ev.location||''});
     });
   }));
   out.sort((a,b)=>a.s-b.s);
@@ -1449,24 +1463,25 @@ async function gcFetchAll(){
 }
 
 async function gcRefresh(){
-  if(gBusy||!gcTokenOk())return;
-  gBusy=true;
-  try{await gcFetchAll();}
-  catch(e){if(gUserClick)gcMsg('No se pudieron leer los eventos. Intenta de nuevo.');}
+  if(gBusy)return;
+  if(!gcTokenOk())return;
+  gBusy=true;gLastError=null;gcRender();
+  try{await gcFetchAll();gExpired=false;}
+  catch(e){if(e&&e.message==='auth'){gcExpire();return;}gLastError=e;}
   gBusy=false;gcRender();
 }
-
 function gcInit(){
   if(gClient||!window.google||!google.accounts||!google.accounts.oauth2)return;
   gClient=google.accounts.oauth2.initTokenClient({
     client_id:GC_ID,scope:GC_SCOPE,
     callback:resp=>{
-      if(resp.error||!resp.access_token){if(gUserClick)gcMsg('No se pudo conectar con Google.');return;}
+      if(resp.error||!resp.access_token){if(gcConnected()){gExpired=true;gcRender();}else if(gUserClick)gcMsg('No se pudo conectar con Google.');return;}
       gToken=resp.access_token;gTokenExp=Date.now()+(+resp.expires_in||3600)*1000;
+      gExpired=false;gLastError=null;
       try{localStorage.setItem('relojGcal','1');}catch(e){}
       gcRefresh();
     },
-    error_callback:()=>{if(gUserClick)gcMsg('Se cerró la ventana de Google sin conectar.');}
+    error_callback:()=>{if(gcConnected()&&!gcTokenOk()){gExpired=true;gcRender();}else if(gUserClick)gcMsg('Se cerró la ventana de Google sin conectar.');}
   });
   if(gcConnected())gClient.requestAccessToken({prompt:''});
 }
@@ -1484,6 +1499,7 @@ document.getElementById('gcalBtn').addEventListener('click',()=>{
   if(gcTokenOk()){gcRefresh();return;}
   gClient.requestAccessToken({prompt:gcConnected()?'':'consent'});
 });
+document.getElementById('gcalRetry').addEventListener('click',()=>{gUserClick=true;gLastError=null;gcRender();gcRefresh();});
 document.getElementById('gcalOff').addEventListener('click',()=>{
   try{if(gToken&&window.google)google.accounts.oauth2.revoke(gToken,()=>{});}catch(e){}
   gToken=null;gTokenExp=0;gEvents=[];

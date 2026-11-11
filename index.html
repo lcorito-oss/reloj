@@ -17,30 +17,40 @@
 
 
 <style>
-:root{color-scheme:dark;--bg:#000;--band:#000;--arc:#454545;--txt:#8a8a8a;--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#3ddc84}
+:root{--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#91baff;--bg:#080d18;--band:#101a29;--arc:#31425c;--txt:#cbd5e1;color-scheme:dark}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{background:var(--bg);color:#eee;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;overflow:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-h1{font-family:'Poppins','Segoe UI',sans-serif;font-style:italic;font-weight:300;font-size:clamp(1.4rem,5vw,2.2rem);letter-spacing:1px}
+html,body{min-height:100%;height:auto}
+/* Cielo estrellado de fondo en toda la página */
+body{color:#eee;display:flex;flex-direction:column;align-items:center;overflow:hidden;min-height:100svh;justify-content:center;gap:0;overflow-x:hidden;overflow-y:auto;padding:max(28px,env(safe-area-inset-top)) 20px max(22px,env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 0%,#1d2c48 0%,#0c1423 42%,#080d18 78%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background-color:#050811;background-image:radial-gradient(ellipse at 50% 5%,#17223a 0%,#0a101d 48%,#050811 100%)}
+h1{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:normal;font-weight:650;letter-spacing:-.045em;line-height:1.05}
 svg{width:min(92vw,66vh,460px);height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .25s ease-out}
 svg:focus-visible{outline:2px solid var(--glow);outline-offset:6px;border-radius:50%}
-#info{font:600 15px/1.2 'Segoe UI',sans-serif;color:#aaa;letter-spacing:.5px;text-align:center;min-height:1em}
-#tools{display:flex;gap:10px;opacity:0;transition:opacity .3s}
+/* fecha centrada sobre la tarjeta Cielo de hoy */
+/* espacios equilibrados: anillos · fecha · tarjeta */
+#info{font:600 15px/1.2 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:#f2f6ff !important;font-size:clamp(1.3rem,2.4vw,1.85rem);font-weight:600;letter-spacing:-.025em;text-align:center;min-height:0;margin:0;line-height:1.3}
+#tools{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s ease;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:min(100%,360px);margin-inline:auto}
 #tools:hover,#tools:focus-within{opacity:1}
-#tools button{padding:6px 11px;font-size:15px;border-radius:50%;opacity:.7;line-height:1}
-#tools button:hover{opacity:1}
+/* Controles compactos: mitad de ancho y altura, con etiquetas legibles. */
+#tools button{line-height:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #ffffff18;background:#ffffff08;color:#f2f6ff;opacity:1;transition:background .18s,border-color .18s,transform .18s;width:50%;justify-self:center;min-height:36px;padding:3px 2px;gap:2px;font-size:.85rem;border-radius:16px}
+#tools button:hover{opacity:1;transform:translateY(-2px);border-color:#91baff70;background:#91baff14;color:#fff}
 #tools.edit{opacity:1}
-#txt{display:none;background:#111;color:#eee;border:1px solid #444;border-radius:16px;padding:6px 12px;font:14px 'Segoe UI',sans-serif;width:150px;outline:none}
+#txt{display:none;border:1px solid #444;outline:none;width:100%;min-height:42px;padding:10px 13px;border-radius:12px;background:#0b1321;color:#f2f6ff;font:inherit;grid-column:1/-1}
 #tools.edit #txt{display:block}
 #txt:focus{border-color:var(--glow)}
 #glow feFlood,#bglow feFlood{flood-color:var(--glow)}
-@media (prefers-reduced-motion:reduce){.ring{transition:none}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-@media (hover:none){#tools{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .ring{transition:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto !important;animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+@media (hover:none){
+  #tools{opacity:1}
+}
 .ring{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
-text{font-family:'Segoe UI',Tahoma,sans-serif;fill:var(--txt);text-anchor:middle;dominant-baseline:central}
+text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--txt);text-anchor:middle;dominant-baseline:central}
 text.on{font-weight:700}
-#rDay text,#rMon text,#rWk text{opacity:.35;filter:blur(.35px);font-size:6.5px;transition:opacity .6s,font-size .6s}
+#rDay text,#rMon text,#rWk text{opacity:.5;filter:blur(.2px);font-size:8px;transition:opacity .6s,font-size .6s}
 #rDay text.on,#rMon text.on,#rWk text.on{opacity:1;filter:none;font-size:14px}
 .data,.live,.intro,.avatar{transition:opacity .8s}
 .data,.live{opacity:0}
@@ -49,7 +59,7 @@ svg.go .intro,svg.go .avatar{opacity:0}
 #aS,#aM,#aH{opacity:0;transition:opacity .8s}
 svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 .intro text,#spin text{fill:#a9a9a9;font-weight:600}
-#spin text{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:14px;fill:#c9c9c9}
+#spin text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:400;font-size:14px;fill:#7fb9ff}
 .nums text{fill:#ccc;font-weight:600;font-size:13px}
 .nums text:nth-child(2){fill:var(--day)}
 .nums text:nth-child(3){fill:var(--mon)}
@@ -63,7 +73,7 @@ svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 #gD.lit text{fill:var(--day);font-weight:700}
 #gM.lit text{fill:var(--mon);font-weight:700}
 #gW.lit text{fill:var(--wk);font-weight:700}
-button{background:#1b1b1b;color:#bbb;border:1px solid #444;border-radius:20px;padding:8px 18px;font:13px 'Segoe UI',sans-serif;cursor:pointer}
+button{background:#1b1b1b;color:#bbb;border:1px solid #444;border-radius:20px;padding:8px 18px;font:13px ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer}
 button:hover{border-color:#888;color:#fff}
 /* manecillas = color del anillo correspondiente */
 #hS{stroke:var(--day);filter:url(#glowS)}
@@ -80,149 +90,134 @@ button:hover{border-color:#888;color:#fff}
 #edgeM feFlood{flood-color:var(--mon)}
 #edgeH feFlood{flood-color:var(--wk)}
 #face{filter:url(#neon)}
-#neon feFlood{flood-color:#1f6bff}
-#spin text{fill:#1f6bff}
-#info,#info span{color:#1f6bff!important}
-:root{--bg:#080d18;--band:#101a29;--arc:#31425c;--txt:#cbd5e1;color-scheme:dark}
-html,body{min-height:100%;height:auto}
-body{min-height:100svh;justify-content:center;gap:0;overflow-x:hidden;overflow-y:auto;padding:max(28px,env(safe-area-inset-top)) 20px max(22px,env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 0%,#1d2c48 0%,#0c1423 42%,#080d18 78%);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.45;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);background-size:190px 190px,230px 230px,270px 270px}
-.app-shell{position:relative;width:min(100%,980px);margin:auto}
+#neon feFlood{flood-color:#7fb9ff}
+#info,#info span{color:#f2f6ff !important}
+/* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
+body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);z-index:0;inset:0;pointer-events:none;background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
+.app-shell{position:relative;width:min(100%,980px);margin:auto;z-index:2}
 .app-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 22px;padding:0 4px}
 .eyebrow,.section-kicker{color:#91baff;font-size:.72rem;font-weight:750;letter-spacing:.18em;text-transform:uppercase}
-h1{margin-top:10px;color:#f3f7ff;font-size:clamp(1.8rem,4vw,3rem);font-style:normal;font-weight:650;letter-spacing:-.045em;line-height:1.05}
 .lede{margin-top:10px;max-width:38rem;color:#9eacc2;font-size:.96rem;line-height:1.6}
 .header-badge{flex:none;display:flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid #ffffff17;border-radius:999px;background:#ffffff08;color:#c6d2e5;font-size:.82rem}
-.header-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#67e8a5;box-shadow:0 0 14px #67e8a588}
-.clock-panel{display:grid;grid-template-columns:minmax(280px,1.05fr) minmax(300px,.95fr);align-items:center;gap:clamp(16px,4vw,54px);padding:clamp(20px,4vw,46px);border:1px solid #ffffff18;border-radius:30px;background:linear-gradient(145deg,#ffffff0b,#ffffff04 62%);box-shadow:0 28px 90px #0007,inset 0 1px #ffffff0c;backdrop-filter:blur(18px)}
+.header-badge::before{content:"";width:8px;height:8px;border-radius:50%;background:#91baff;box-shadow:0 0 14px #91baff88}
+/* Mantén el reloj y la fase lunar flotando sobre el cielo, sin marco exterior */
+.clock-panel{display:grid;grid-template-columns:minmax(280px,1.05fr) minmax(300px,.95fr);align-items:center;gap:clamp(16px,4vw,54px);padding:clamp(8px,1.6vw,18px) 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
 .clock-stage{display:grid;place-items:center;min-width:0;padding:10px;border-radius:50%;background:radial-gradient(circle,#1c2a42 0%,#111b2d 56%,transparent 72%)}
 #clock{display:block;width:min(100%,440px);max-height:none;filter:drop-shadow(0 18px 36px #0006)}
 #clock:focus-visible{outline:2px solid #91baff;outline-offset:8px}
 .clock-details{min-width:0;padding:8px 0}
 .section-kicker{margin-bottom:15px;color:#71839f}
-#info{min-height:1.5em;color:#f2f6ff!important;font-size:clamp(1.3rem,2.4vw,1.85rem);font-weight:600;letter-spacing:-.025em;line-height:1.4;text-align:left}
-#info span{color:#f2f6ff!important}
+#info span{color:#f2f6ff !important}
 .details-copy{margin-top:13px;max-width:25rem;color:#9eacc2;font-size:.92rem;line-height:1.7}
 .ring-legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:25px 0 28px}
 .legend-item{display:flex;align-items:center;gap:8px;color:#c2cede;font-size:.78rem}
 .legend-dot{width:9px;height:9px;flex:none;border-radius:50%;background:var(--dot);box-shadow:0 0 12px color-mix(in srgb,var(--dot),transparent 45%)}
-#tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;opacity:1}
-#tools button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:72px;padding:10px 6px;border:1px solid #ffffff18;border-radius:17px;background:#ffffff08;color:#f2f6ff;font-size:1.2rem;opacity:1;transition:background .18s,border-color .18s,transform .18s}
-#tools button::after{content:attr(data-label);color:#aebbd0;font-size:.67rem;font-weight:600;letter-spacing:.01em}
-#tools button:hover{transform:translateY(-2px);border-color:#91baff70;background:#91baff14;color:#fff}
+#tools button::after{content:attr(data-label);color:#aebbd0;font-weight:600;letter-spacing:.01em;font-size:.55rem}
 #tools button:focus-visible,#txt:focus-visible{outline:2px solid #91baff;outline-offset:3px}
-#tools button[aria-pressed="true"]{border-color:#67e8a566;background:#67e8a512}
-#txt{grid-column:1/-1;width:100%;min-height:42px;padding:10px 13px;border-radius:12px;background:#0b1321;color:#f2f6ff;font:inherit}
+#tools button[aria-pressed="true"]{border-color:#91baff66;background:#91baff14}
 #txt::placeholder{color:#7d8ca2}
 .app-footer{display:flex;justify-content:space-between;gap:18px;margin-top:16px;padding:0 6px;color:#7f8da4;font-size:.76rem;line-height:1.5}
 .app-footer strong{color:#aab8cc;font-weight:600}
-#face{filter:url(#neon)}
-#neon feFlood{flood-color:#7fb9ff}
-#spin text{fill:#7fb9ff}
-#info,#info span{color:#f2f6ff!important}
-@media(max-width:700px){body{padding-left:14px;padding-right:14px}.app-header{align-items:flex-start;flex-direction:column;gap:16px}.header-badge{align-self:flex-start}.clock-panel{grid-template-columns:1fr;gap:4px;border-radius:24px;padding:18px}.clock-stage{width:min(100%,430px);margin:auto;padding:0}.clock-details{padding:0 4px 4px}.section-kicker{margin-bottom:8px}#info{min-height:2.8em}.ring-legend{margin:18px 0 20px}.app-footer{flex-direction:column;gap:3px}}
-@media(max-width:390px){#tools{grid-template-columns:repeat(2,minmax(0,1fr))}.ring-legend{grid-template-columns:1fr 1fr}}
-@media(prefers-reduced-motion:reduce){#tools button{transition:none}}
-
-
-.moon-card{display:grid;grid-template-columns:58px minmax(0,1fr);align-items:center;gap:15px;margin-top:22px;padding:16px;border:1px solid #ffffff16;border-radius:18px;background:linear-gradient(135deg,#b9d6ff12,#ffffff04)}
-.moon-symbol{display:block;width:54px;height:54px;padding:5px;border:1px solid #dbeafe22;border-radius:16px;background:#0b1321}
-.moon-content{min-width:0}
-.moon-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.moon-label{color:#91baff;font-size:.65rem;font-weight:750;letter-spacing:.16em}
-.moon-illumination{color:#b9c8dd;font-size:.72rem;font-variant-numeric:tabular-nums}
-.moon-name{display:block;margin-top:5px;color:#f2f6ff;font-size:1.05rem;font-weight:650}
-.moon-meter{height:5px;overflow:hidden;margin-top:9px;border-radius:99px;background:#ffffff15}
-.moon-meter span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#83aef3,#e4efff);transition:width .5s ease}
-.moon-age{margin-top:6px;color:#8e9db3;font-size:.69rem}
-@media(max-width:390px){.moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}.moon-symbol{width:46px;height:46px;padding:4px}.moon-header{align-items:flex-start;flex-direction:column;gap:3px}}
-@media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
-
-#tools{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility .25s ease}
-#tools.controls-visible,#tools:focus-within,#tools.edit{opacity:1;visibility:visible;pointer-events:auto}
-
-@media (pointer:coarse){#hS{filter:none}}
-
+@media(max-width:700px){
+  body{padding-left:14px;padding-right:14px}
+  .app-header{align-items:flex-start;flex-direction:column;gap:16px}
+  .header-badge{align-self:flex-start}
+  .clock-panel{grid-template-columns:1fr;gap:4px;border-radius:24px;padding:18px}
+  .clock-stage{width:min(100%,430px);margin:auto;padding:0}
+  .clock-details{padding:0 4px 4px}
+  .section-kicker{margin-bottom:8px}
+  #info{min-height:2.8em}
+  .ring-legend{margin:18px 0 20px}
+  .app-footer{flex-direction:column;gap:3px}
+}
+@media(max-width:390px){
+  #tools{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ring-legend{grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  #tools button{transition:none}
+}
 /* Bloque lunar inspirado en la vista de Luna llena */
-.moon-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(115px,.7fr) minmax(0,1.3fr);align-items:center;gap:clamp(12px,2vw,24px);margin-top:24px;padding:clamp(16px,2.3vw,24px);overflow:hidden;border:1px solid #ffffff18;border-radius:24px;background:radial-gradient(ellipse at 22% 50%,#8295b425 0,transparent 43%),linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d}
+.moon-card{position:relative;isolation:isolate;display:grid;grid-template-columns:minmax(115px,.7fr) minmax(0,1.3fr);align-items:center;gap:clamp(12px,2vw,24px);padding:clamp(16px,2.3vw,24px);overflow:hidden;border:1px solid #ffffff18;border-radius:24px;background:radial-gradient(ellipse at 22% 50%,#8295b425 0,transparent 43%),linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d;margin-top:18px}
+.moon-symbol{padding:5px;border:1px solid #dbeafe22;border-radius:16px;background:#0b1321;display:block;width:min(100%,176px);height:auto;overflow:visible;filter:drop-shadow(0 0 10px #e5e3d566) drop-shadow(0 0 26px #d6d9df38)}
+.moon-content{min-width:0;padding:2px 0}
+.moon-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.moon-label{display:block;color:#aebbd0;font-size:.66rem;font-weight:750;letter-spacing:.19em}
+.moon-illumination{color:#b9c8dd;font-size:.72rem;font-variant-numeric:tabular-nums;display:none}
+.moon-name{display:block;margin-top:5px;color:#f2f4fa;font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.5vw,2.1rem);font-weight:500;letter-spacing:-.035em;line-height:1.12}
+.moon-meter{overflow:hidden;border-radius:99px;height:4px;margin-top:12px;background:#ffffff19;position:relative}
+.moon-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .5s ease;background:linear-gradient(90deg,#9aa9c2,#f4f2e9);box-shadow:0 0 10px #e4e6ed55}
+.moon-age{margin-top:6px;color:#8e9db3;font-size:.69rem;display:none}
+@media(max-width:390px){
+  .moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}
+  .moon-symbol{width:46px;height:46px;padding:4px}
+  .moon-header{align-items:flex-start;flex-direction:column;gap:3px}
+}
+@media(prefers-reduced-motion:reduce){
+  .moon-meter span{transition:none}
+}
+#tools.controls-visible,#tools:focus-within,#tools.edit{opacity:1;visibility:visible;pointer-events:auto}
+@media (pointer:coarse){
+  #hS{filter:none}
+}
 .moon-card::before{content:"";position:absolute;inset:0;z-index:-1;opacity:.6;pointer-events:none;background-image:radial-gradient(circle at 8% 18%,#dce8ff 0 1px,transparent 1.6px),radial-gradient(circle at 28% 80%,#dce8ff 0 .8px,transparent 1.4px),radial-gradient(circle at 47% 12%,#dce8ff 0 .7px,transparent 1.5px),radial-gradient(circle at 89% 27%,#dce8ff 0 1px,transparent 1.8px),radial-gradient(circle at 74% 89%,#dce8ff 0 .8px,transparent 1.5px)}
 .moon-visual{display:grid;place-items:center;min-width:0;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#e7e3d180 0 28%,#d5d9e033 42%,transparent 72%)}
-.moon-symbol{display:block;width:min(100%,176px);height:auto;overflow:visible;filter:drop-shadow(0 0 10px #e5e3d566) drop-shadow(0 0 26px #d6d9df38)}
 .moon-photo{filter:brightness(1.12) contrast(1.04) saturate(.42)}
-.moon-content{min-width:0;padding:2px 0}
-.moon-label{display:block;color:#aebbd0;font-size:.66rem;font-weight:750;letter-spacing:.19em}
-.moon-name{display:block;margin-top:5px;color:#f2f4fa;font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.5vw,2.1rem);font-weight:500;letter-spacing:-.035em;line-height:1.12}
 .moon-date{margin-top:9px;color:#a1adbf;font-size:.82rem;line-height:1.4}
 .moon-place{margin-top:3px;color:#78869c;font-size:.75rem}
 .moon-stats{display:grid;gap:7px;margin-top:16px}
 .moon-stats div{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9ba8bc;font-size:.82rem}
 .moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums}
-.moon-illumination{display:none}
-.moon-age{display:none}
-.moon-meter{height:4px;margin-top:12px;background:#ffffff19}
-.moon-meter span{background:linear-gradient(90deg,#9aa9c2,#f4f2e9);box-shadow:0 0 10px #e4e6ed55}
-@media(max-width:700px){.moon-card{grid-template-columns:minmax(96px,.55fr) minmax(0,1.45fr);gap:13px;margin-top:18px;padding:16px}.moon-symbol{width:min(100%,142px)}}
-@media(max-width:390px){.moon-card{grid-template-columns:82px minmax(0,1fr);gap:10px;padding:13px;border-radius:19px}.moon-symbol{width:82px}.moon-name{font-size:1.35rem}.moon-date{font-size:.74rem}.moon-place{font-size:.68rem}.moon-stats{margin-top:12px}.moon-stats div{font-size:.73rem}}
-@media(prefers-reduced-motion:reduce){.moon-meter span{transition:none}}
-
-/* Cielo estrellado de fondo en toda la página */
-body{background-color:#050811;background-image:radial-gradient(ellipse at 50% 5%,#17223a 0%,#0a101d 48%,#050811 100%)}
-body::before{z-index:0;inset:0;opacity:.72;background-image:radial-gradient(1px 1px at 7% 12%,#e7efff 99%,transparent),radial-gradient(1px 1px at 19% 67%,#cad8f4 99%,transparent),radial-gradient(1.3px 1.3px at 31% 28%,#fff 99%,transparent),radial-gradient(1px 1px at 44% 82%,#cbdcff 99%,transparent),radial-gradient(1.2px 1.2px at 57% 17%,#edf3ff 99%,transparent),radial-gradient(1px 1px at 68% 58%,#d8e2f8 99%,transparent),radial-gradient(1.4px 1.4px at 79% 31%,#fff 99%,transparent),radial-gradient(1px 1px at 92% 76%,#d6e3ff 99%,transparent),radial-gradient(ellipse at 18% 32%,#6378a512,transparent 42%),radial-gradient(ellipse at 81% 66%,#536caa10,transparent 44%);background-size:173px 191px,227px 239px,283px 269px,317px 331px,359px 307px,389px 367px,431px 397px,463px 443px,100% 100%,100% 100%;background-position:0 0,23px 41px,71px 5px,119px 69px,39px 101px,157px 19px,83px 177px,211px 131px,center,center;pointer-events:none}
-.app-shell{z-index:1}
-
-/* Mantén el reloj y la fase lunar flotando sobre el cielo, sin marco exterior */
-.clock-panel{padding:clamp(8px,1.6vw,18px) 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
-@media(max-width:700px){.clock-panel{gap:10px;padding:4px 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}}
-
+@media(max-width:700px){
+  .moon-card{grid-template-columns:minmax(96px,.55fr) minmax(0,1.45fr);gap:13px;margin-top:18px;padding:16px}
+  .moon-symbol{width:min(100%,142px)}
+}
+@media(max-width:390px){
+  .moon-card{grid-template-columns:82px minmax(0,1fr);gap:10px;padding:13px;border-radius:19px}
+  .moon-symbol{width:82px}
+  .moon-name{font-size:1.35rem}
+  .moon-date{font-size:.74rem}
+  .moon-place{font-size:.68rem}
+  .moon-stats{margin-top:12px}
+  .moon-stats div{font-size:.73rem}
+}
+@media(prefers-reduced-motion:reduce){
+  .moon-meter span{transition:none}
+}
+@media(max-width:700px){
+  .clock-panel{gap:10px;padding:4px 0;border:0;border-radius:0;background:transparent;box-shadow:none;backdrop-filter:none}
+}
 /* Estrellas y constelaciones del cielo local, dibujadas detrás del reloj. */
 #sky{position:fixed;inset:0;z-index:1;width:100vw;height:100vh;pointer-events:none}
-.app-shell{z-index:2}
-
-/* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
-body::before{background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
-
-/* fecha centrada sobre la tarjeta Cielo de hoy */
-#info{text-align:center}
-.moon-meter{position:relative}
 .moon-meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:#050811;border-radius:inherit;transition:width .5s ease}
-@media(prefers-reduced-motion:reduce){.moon-meter i{transition:none}}
-
+@media(prefers-reduced-motion:reduce){
+  .moon-meter i{transition:none}
+}
 /* Google Calendar */
-.gcal-card{margin-top:14px;margin-bottom:16px;padding:16px 18px;border:1px solid #ffffff18;border-radius:24px;background:linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d}
+/* próximos eventos: más compacto */
+.gcal-card{margin-top:14px;margin-bottom:16px;border:1px solid #ffffff18;background:linear-gradient(140deg,#090d16f2,#0a0f19ed);box-shadow:0 18px 48px #0005,inset 0 1px #ffffff0d;padding:11px 14px;border-radius:24px}
 .gcal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .gcal-actions{display:flex;gap:6px}
-.gcal-btn{padding:6px 12px;border:1px solid #91baff55;border-radius:999px;background:#91baff14;color:#dbe8ff;font:600 .72rem 'Segoe UI',sans-serif;cursor:pointer}
+.gcal-btn{border:1px solid #91baff55;border-radius:999px;background:#91baff14;color:#dbe8ff;font:600 .72rem ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;padding:4px 10px;font-size:.66rem}
 .gcal-btn:hover{border-color:#91baff;color:#fff}
 .gcal-off{border-color:#ffffff22;background:transparent;color:#9ba8bc}
 .gcal-btn[hidden]{display:none}
-.gcal-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:7px}
-.gcal-list li{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:10px;align-items:baseline;color:#eef1f7;font-size:.86rem}
-.gcal-when{color:#91baff;font-size:.74rem;font-weight:700;text-transform:capitalize}
+.gcal-list{list-style:none;margin:10px 0 0;padding:0;display:grid;margin-top:8px;gap:5px}
+.gcal-list li{display:grid;align-items:baseline;color:#eef1f7;grid-template-columns:72px minmax(0,1fr) auto;gap:8px;font-size:.78rem}
+.gcal-when{color:#91baff;font-weight:700;text-transform:capitalize;font-size:.68rem}
 .gcal-title{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gcal-sub{color:#8d9bb2;font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap}
-.gcal-msg{margin:10px 0 0;color:#9ba8bc;font-size:.78rem}
+.gcal-sub{color:#8d9bb2;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px;font-size:.68rem}
+.gcal-msg{margin:10px 0 0;color:#9ba8bc;margin-top:8px;font-size:.72rem}
 .gcal-msg:empty{display:none}
 .gcal-msg.err{color:#ffb4b4}
-.gcal-sub{overflow:hidden;text-overflow:ellipsis;max-width:130px}
 #rDay text.ev:not(.on){opacity:.95;filter:none;fill:#ffd27a;font-size:8.5px;font-weight:700}
-
-/* espacios equilibrados: anillos · fecha · tarjeta */
-#info{min-height:0;margin:0;line-height:1.3}
-.moon-card{margin-top:18px}
-@media(max-width:700px){.clock-panel{gap:0}.clock-details{padding-top:0}#info{min-height:0;margin-top:18px}.moon-card{margin-top:18px}}
-/* próximos eventos: más compacto */
-.gcal-card{padding:11px 14px;border-radius:20px}
-.gcal-btn{padding:4px 10px;font-size:.66rem}
-.gcal-list{margin-top:8px;gap:5px}
-.gcal-list li{grid-template-columns:72px minmax(0,1fr) auto;gap:8px;font-size:.78rem}
-.gcal-when{font-size:.68rem}
-.gcal-sub{font-size:.68rem}
-.gcal-msg{margin-top:8px;font-size:.72rem}
-
-/* Controles compactos: mitad de ancho y altura, con etiquetas legibles. */
-#tools button{width:50%;justify-self:center;min-height:36px;padding:3px 2px;gap:2px;border-radius:9px;font-size:.85rem}
-#tools button::after{font-size:.55rem}
-#tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;width:min(100%,360px);margin-inline:auto}#tools button{border-radius:12px}#txt{grid-column:1/-1}</style>
+@media(max-width:700px){
+  .clock-panel{gap:0}
+  .clock-details{padding-top:0}
+  #info{min-height:0;margin-top:18px}
+  .moon-card{margin-top:18px}
+}
+</style>
 </head>
 <body>
 <canvas id="sky" aria-hidden="true"></canvas>

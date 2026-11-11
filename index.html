@@ -146,7 +146,7 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 .moon-illumination{color:#b9c8dd;font-size:.72rem;font-variant-numeric:tabular-nums;display:none}
 .moon-name{display:block;margin-top:5px;color:#f2f4fa;font-family:Georgia,'Times New Roman',serif;font-size:clamp(1.4rem,3.5vw,2.1rem);font-weight:500;letter-spacing:-.035em;line-height:1.12}
 .moon-meter{overflow:hidden;border-radius:99px;height:4px;margin-top:12px;background:#ffffff19;position:relative}
-.moon-meter span{display:block;width:0;height:100%;border-radius:inherit;transition:width .5s ease;background:linear-gradient(90deg,#9aa9c2,#f4f2e9);box-shadow:0 0 10px #e4e6ed55}
+.moon-meter span{position:absolute;top:0;bottom:0;left:0;width:0;border-radius:inherit;transition:width .5s ease;background:linear-gradient(90deg,#9aa9c2,#f4f2e9);box-shadow:0 0 10px #e4e6ed55}
 .moon-age{margin-top:6px;color:#8e9db3;font-size:.69rem;display:none}
 @media(max-width:390px){
   .moon-card{grid-template-columns:48px minmax(0,1fr);gap:11px;padding:13px}
@@ -1265,8 +1265,9 @@ function updateMoonPhase(){
   const meter=document.getElementById('moon-meter');
   meter.setAttribute('aria-valuenow',String(illumination));
   meter.setAttribute('aria-valuetext',`${illumination}% iluminada`);
-  document.getElementById('moon-meter-fill').style.width=waxing?`${illumination}%`:'100%';
-  document.getElementById('moon-meter-dark').style.width=waxing?'0%':`${100-illumination}%`;
+  const mFill=document.getElementById('moon-meter-fill'),mDark=document.getElementById('moon-meter-dark');
+  if(waxing){mFill.style.left='auto';mFill.style.right='0';mFill.style.width=`${illumination}%`;mFill.style.background='linear-gradient(90deg,#9aa9c2,#f4f2e9)';mDark.style.left='0';mDark.style.right='auto';mDark.style.width='0%';}
+  else{mFill.style.left='0';mFill.style.right='auto';mFill.style.width='100%';mFill.style.background='linear-gradient(270deg,#9aa9c2,#f4f2e9)';mDark.style.left='auto';mDark.style.right='0';mDark.style.width=`${100-illumination}%`;}
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES = [

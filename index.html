@@ -1211,20 +1211,33 @@ function setSpinText(t){
   g.innerHTML='';
   const sp=Math.min(14,2*Math.PI*112/(t.length+1));
   const n=t.length, step=sp/112*180/Math.PI, span=(n-1)*step;
-  // La estela va por debajo del texto (se dibuja primero) y lo persigue por
-  // el mismo arco: tramos que se afinan y se apagan hacia atrás.
-  const fin=-span/2-2, PASO=18;
-  const anchos=[12,10,8,6,4,3], opacs=[0.4,0.32,0.24,0.16,0.09,0.04];
-  for(let i=0;i<anchos.length;i++){
-    const p=document.createElementNS(NS,'path');
-    p.setAttribute('d',arcoEstela(112,fin-i*PASO,fin-(i+1)*PASO));
-    p.setAttribute('fill','none');
-    p.setAttribute('stroke-linecap','round');
-    p.setAttribute('filter','url(#trailGlow)');
-    p.style.stroke='var(--trail)';
-    p.style.strokeWidth=anchos[i];
-    p.style.opacity=opacs[i];
-    g.appendChild(p);
+  // La estela es polvo que persigue al texto por el mismo arco: motitas que
+  // se afinan y se apagan hacia atrás, como la cola de polvo de un cometa.
+  // Se dibuja primero para quedar por debajo del texto.
+  const fin=-span/2-2, LARGO=115, N=70;
+  let semilla=1234567;
+  const azar=()=>{semilla=(semilla*1103515245+12345)%2147483648;return semilla/2147483648;};
+  // Hilo tenue que une el polvo
+  const hilo=document.createElementNS(NS,'path');
+  hilo.setAttribute('d',arcoEstela(112,fin,fin-LARGO));
+  hilo.setAttribute('fill','none');
+  hilo.setAttribute('stroke-linecap','round');
+  hilo.style.stroke='var(--trail)';
+  hilo.style.strokeWidth=2.5;
+  hilo.style.opacity=0.06;
+  g.appendChild(hilo);
+  for(let i=0;i<N;i++){
+    const a=fin-2-i*(LARGO/N);
+    const r=112+(azar()-0.5)*14;
+    const [x,y]=puntoArco(r,a);
+    const f=1-i/N; // 1 junto al texto, 0 al final de la estela
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',x.toFixed(1));
+    c.setAttribute('cy',y.toFixed(1));
+    c.setAttribute('r',(0.4+azar()*1.7*(0.4+0.6*f)).toFixed(2));
+    c.style.fill='var(--trail)';
+    c.style.opacity=((0.15+azar()*0.4)*(0.15+0.85*f)).toFixed(2);
+    g.appendChild(c);
   }
   label(t,112,14,sp,'spin');
   actualizarEstela();

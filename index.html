@@ -1221,11 +1221,12 @@ function setSpinText(t){
       p.setAttribute('d',arcoEstela(radio,fin-2,fin-2-largo));
       p.setAttribute('fill','none');p.setAttribute('stroke',color);
       p.setAttribute('stroke-width',grosor);p.setAttribute('stroke-linecap','round');
-      p.style.opacity=opacidad;insertarAntesDelTexto(p);
+      p.style.opacity=opacidad;p.style.filter='drop-shadow(0 0 3px var(--trail))';
+      insertarAntesDelTexto(p);
     };
-    capa(112,'#38bdf8',9,0.10);   // nube difusa
-    capa(112,'#55dfff',3.5,0.20); // cola de gas azul
-    capa(112,'#eafaff',1,0.48);   // filamento ionizado
+    capa(112,'var(--trail)',9,0.12);  // halo neón difuso
+    capa(112,'var(--trail)',3.5,0.28); // cola luminosa
+    capa(112,'#ffffff',1.1,0.72);  // núcleo brillante
     let semilla=1234567;
     const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
     for(let i=0;i<120;i++){
@@ -1234,14 +1235,15 @@ function setSpinText(t){
       const p=document.createElementNS(NS,'circle');
       p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
       p.setAttribute('r',(0.3+azar()*(1.05-0.55*f)).toFixed(2));
-      p.setAttribute('fill',azar()<.68?'#c8f4ff':'#4dcfff');
-      p.style.opacity=((.1+azar()*.38)*(1-.72*f)).toFixed(2);
-      insertarAntesDelTexto(p);
+      p.setAttribute('fill',azar()<.68?'#ffffff':'var(--trail)');
+      p.style.opacity=((.12+azar()*.42)*(1-.72*f)).toFixed(2);
+      p.style.filter='drop-shadow(0 0 2px var(--trail))';insertarAntesDelTexto(p);
     }
     const [x,y]=puntoArco(112,fin-1);
     const aura=document.createElementNS(NS,'circle');
     aura.setAttribute('cx',x.toFixed(1));aura.setAttribute('cy',y.toFixed(1));
-    aura.setAttribute('r','3.2');aura.setAttribute('fill','#6be2ff');aura.style.opacity='.32';
+    aura.setAttribute('r','3.2');aura.setAttribute('fill','var(--trail)');
+    aura.style.opacity='.48';aura.style.filter='drop-shadow(0 0 5px var(--trail))';
     insertarAntesDelTexto(aura);
   }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();

@@ -1242,6 +1242,8 @@ function setSpinText(t){
   }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();
 }
+setSpinText(spinText);
+
 function mark(id,idx){
   [...document.getElementById(id).children].forEach((el,i)=>{
     el.classList.toggle('on',i===idx);

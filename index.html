@@ -236,8 +236,8 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
       <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <filter id="trailGlow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
-      <feFlood flood-opacity=".6"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.6" result="b"/>
+      <feFlood flood-opacity=".35"/>
       <feComposite in2="b" operator="in" result="g"/>
       <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
@@ -1199,7 +1199,7 @@ label('DÍA SEMANA',134,10,14,'gW');
 let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
 // Estela de cometa del texto giratorio: copias fantasma rezagadas en el giro,
 // que giran con el texto y se desvanecen detrás de él, como un cometa.
-const ESTELA_N=8, ESTELA_PASO=5; // 8 fantasmas, 5° cada uno
+const ESTELA_N=5, ESTELA_PASO=4; // 5 fantasmas, 4° cada uno: estela corta y sutil
 function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
 function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
 function setSpinText(t){
@@ -1213,7 +1213,7 @@ function setSpinText(t){
       if(c===' ')return;
       const el=txt(g,c,112,14,(i-(n-1)/2)*step-k*ESTELA_PASO);
       el.classList.add('trail');
-      el.style.opacity=((1-k/(ESTELA_N+1))*0.7).toFixed(2);
+      el.style.opacity=((1-k/(ESTELA_N+1))*0.4).toFixed(2);
     });
   }
   actualizarEstela();

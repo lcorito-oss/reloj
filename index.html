@@ -1197,25 +1197,36 @@ label('DÍA',178,11,20,'gD');
 label('MES',156,11,18,'gM');
 label('DÍA SEMANA',134,10,14,'gW');
 let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
-// Estela de cometa del texto giratorio: copias fantasma rezagadas en el giro,
-// que giran con el texto y se desvanecen detrás de él, como un cometa.
-const ESTELA_N=5, ESTELA_PASO=4; // 5 fantasmas, 4° cada uno: estela corta y sutil
+// Estela de cometa del texto giratorio: un haz luminoso que persigue al
+// texto por el mismo arco, como la cola de un cometa, y se desvanece.
 function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
 function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
+function puntoArco(r,deg){const a=deg*Math.PI/180;return [200+r*Math.sin(a),200-r*Math.cos(a)];}
+function arcoEstela(r,a1,a2){
+  const [x1,y1]=puntoArco(r,a1), [x2,y2]=puntoArco(r,a2);
+  return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 0 0 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+}
 function setSpinText(t){
   const g=document.getElementById('spin');
   g.innerHTML='';
   const sp=Math.min(14,2*Math.PI*112/(t.length+1));
-  label(t,112,14,sp,'spin');
-  const n=t.length, step=sp/112*180/Math.PI;
-  for(let k=1;k<=ESTELA_N;k++){
-    [...t].forEach((c,i)=>{
-      if(c===' ')return;
-      const el=txt(g,c,112,14,(i-(n-1)/2)*step-k*ESTELA_PASO);
-      el.classList.add('trail');
-      el.style.opacity=((1-k/(ESTELA_N+1))*0.4).toFixed(2);
-    });
+  const n=t.length, step=sp/112*180/Math.PI, span=(n-1)*step;
+  // La estela va por debajo del texto (se dibuja primero) y lo persigue por
+  // el mismo arco: tramos que se afinan y se apagan hacia atrás.
+  const fin=-span/2-2, PASO=18;
+  const anchos=[12,10,8,6,4,3], opacs=[0.4,0.32,0.24,0.16,0.09,0.04];
+  for(let i=0;i<anchos.length;i++){
+    const p=document.createElementNS(NS,'path');
+    p.setAttribute('d',arcoEstela(112,fin-i*PASO,fin-(i+1)*PASO));
+    p.setAttribute('fill','none');
+    p.setAttribute('stroke-linecap','round');
+    p.setAttribute('filter','url(#trailGlow)');
+    p.style.stroke='var(--trail)';
+    p.style.strokeWidth=anchos[i];
+    p.style.opacity=opacs[i];
+    g.appendChild(p);
   }
+  label(t,112,14,sp,'spin');
   actualizarEstela();
 }
 setSpinText(spinText);

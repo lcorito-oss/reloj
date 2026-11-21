@@ -1202,59 +1202,126 @@ let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;
 function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
 function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
 function puntoArco(r,deg){const a=deg*Math.PI/180;return [200+r*Math.sin(a),200-r*Math.cos(a)];}
-function arcoEstela(r,a1,a2){
-  const [x1,y1]=puntoArco(r,a1), [x2,y2]=puntoArco(r,a2);
-  return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 0 0 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+/* ==================================================================
+   ESTELA DE COMETA para el texto giratorio
+   Reemplaza la función setSpinText completa (puedes borrar arcoEstela,
+   ya no se usa). Conserva colorEstela, actualizarEstela y puntoArco.
+   ================================================================== */
+const ESTELA_R=112;
+// En móvil: sin desenfoque y con menos piezas, para cuidar batería y fluidez.
+const ESTELA_LIGERA=matchMedia('(pointer:coarse)').matches;
+
+// Un solo filtro de desenfoque para toda la capa difusa (antes eran ~190 drop-shadow).
+function filtroEstela(){
+  let f=document.getElementById('trailBlur');
+  if(f)return f;
+  f=document.createElementNS(NS,'filter');
+  f.id='trailBlur';
+  f.setAttribute('x','-20%');f.setAttribute('y','-20%');
+  f.setAttribute('width','140%');f.setAttribute('height','140%');
+  const b=document.createElementNS(NS,'feGaussianBlur');
+  b.setAttribute('stdDeviation','1.8');
+  f.appendChild(b);
+  svg.querySelector('defs').appendChild(f);
+  return f;
 }
+
+// Brillo en función de la distancia t (0 = junto al texto, 1 = punta de la cola):
+// cae rápido al inicio y luego se suaviza hasta cero, como el brillo real de un cometa.
+function caidaEstela(t,pot){return Math.pow(1-t,pot)*(.3+.7*Math.exp(-5*t));}
+
+// Dibuja una cola como segmentos de sector anular con ancho, radio y opacidad variables.
+// o: {inicio,largo,n,w0,w1,off,deriva,op,pot,color}
+function capaEstela(g,o){
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const rc=t=>ESTELA_R+o.off+o.deriva*Math.pow(t,1.6); // centro radial (la deriva curva la cola hacia afuera)
+  const w=t=>lerp(o.w0,o.w1,Math.pow(t,.8));           // semiancho
+  for(let i=0;i<o.n;i++){
+    const t0=i/o.n, t1=(i+1)/o.n, tm=(t0+t1)/2;
+    const op=o.op*caidaEstela(tm,o.pot);
+    if(op<.004)continue;
+    const a0=o.inicio-t0*o.largo, a1=o.inicio-t1*o.largo-.35; // .35° de solape: sin costuras
+    const P=[
+      puntoArco(rc(t0)+w(t0),a0),puntoArco(rc(t1)+w(t1),a1),
+      puntoArco(rc(t1)-w(t1),a1),puntoArco(rc(t0)-w(t0),a0)
+    ];
+    const p=document.createElementNS(NS,'path');
+    p.setAttribute('d','M'+P.map(q=>q[0].toFixed(2)+' '+q[1].toFixed(2)).join('L')+'Z');
+    p.style.fill=o.color;
+    p.style.opacity=op.toFixed(3);
+    g.appendChild(p);
+  }
+}
+
 function setSpinText(t){
   const g=document.getElementById('spin');
   g.replaceChildren();
-  const sp=Math.min(14,2*Math.PI*112/(t.length+1));
-  const n=t.length, span=(n-1)*sp/112*180/Math.PI;
-  // Núcleo fino con polvo disperso; el brillo cae hasta desaparecer al final.
-  label(t,112,14,sp,'spin');
+  const sp=Math.min(14,2*Math.PI*ESTELA_R/(t.length+1));
+  const n=t.length, span=(n-1)*sp/ESTELA_R*180/Math.PI;
+  label(t,ESTELA_R,14,sp,'spin');
   try{
-    const fin=-span/2-5, largo=90; // pequeño espacio tras el texto; un cuarto exacto del círculo
-    const inicio=fin-2, segmentos=24;
-    const insertarAntesDelTexto=el=>g.insertBefore(el,g.lastElementChild);
-    for(let i=0;i<segmentos;i++){
-      const f=i/(segmentos-1), a=inicio-f*largo,
-            b=inicio-(i+1)*largo/segmentos-0.45;
-      const dibuja=(ancho,opacidad,color)=>{
-        const p=document.createElementNS(NS,'path');
-        p.setAttribute('d',arcoEstela(112,a,b));
-        p.setAttribute('fill','none');p.setAttribute('stroke',color);
-        p.setAttribute('stroke-width',ancho);p.setAttribute('stroke-linecap','round');
-        p.style.opacity=opacidad;p.style.filter='drop-shadow(0 0 3px var(--trail))';
-        insertarAntesDelTexto(p);
-      };
-      const fade=Math.pow(1-f,1.7);
-      dibuja((8*(1-.78*f)).toFixed(2),(0.12*fade).toFixed(3),'var(--trail)');
-      dibuja((3.4*(1-.72*f)).toFixed(2),(0.28*fade).toFixed(3),'var(--trail)');
-      dibuja((1.05*(1-.5*f)).toFixed(2),(0.72*fade).toFixed(3),'#ffffff');
-    }
+    const inicio=-span/2-3, largo=90, q=ESTELA_LIGERA?.6:1;
+    const N=k=>Math.max(6,Math.round(k*q));
+    const estela=document.createElementNS(NS,'g');
+    g.insertBefore(estela,g.firstChild); // siempre debajo de las letras
+
+    // Capa difusa (una sola vez desenfocada): cola de polvo + resplandor de iones.
+    const difusa=document.createElementNS(NS,'g');
+    if(!ESTELA_LIGERA){filtroEstela();difusa.setAttribute('filter','url(#trailBlur)');}
+    estela.appendChild(difusa);
+
+    // 1) Cola de polvo: ancha, curva (se aleja hacia afuera) y cálida.
+    capaEstela(difusa,{inicio,largo:largo*.8,n:N(36),w0:1.8,w1:7,off:1.5,deriva:7,
+      op:.26,pot:1.5,color:'color-mix(in srgb,var(--trail) 40%,#ffc978)'});
+    // 2) Resplandor de la cola de iones.
+    capaEstela(difusa,{inicio,largo,n:N(40),w0:2.4,w1:3.6,off:0,deriva:0,
+      op:.2,pot:1.9,color:'var(--trail)'});
+    // 3) Cola de iones: fina, recta, sigue exactamente el anillo.
+    capaEstela(estela,{inicio,largo,n:N(48),w0:.95,w1:.4,off:0,deriva:0,
+      op:.8,pot:1.5,color:'var(--trail)'});
+    // 4) Hebras finas de distinto largo: dan el aspecto fibroso de los iones.
+    [[-3.4,.55],[-1.7,.8],[1.9,.65],[3.8,.9]].forEach(([off,len])=>
+      capaEstela(estela,{inicio,largo:largo*len,n:N(14),w0:.3,w1:.3,off,deriva:off>0?2:0,
+        op:.3,pot:1.4,color:'var(--trail)'}));
+    // 5) Núcleo caliente: casi blanco y corto, pegado al texto.
+    capaEstela(estela,{inicio,largo:largo*.4,n:N(20),w0:.6,w1:.15,off:0,deriva:0,
+      op:.95,pot:1.3,color:'#ffffff'});
+
+    // 6) Polvo disperso: más denso cerca del núcleo, sesgado hacia afuera, sin filtros.
     let semilla=1234567;
     const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
-    for(let i=0;i<120;i++){
-      const f=azar(), a=fin-3-f*largo+(azar()-.5)*1.6;
-      const r=112+(azar()-.5)*(2+13*f), [x,y]=puntoArco(r,a);
+    const total=ESTELA_LIGERA?60:110;
+    for(let i=0;i<total;i++){
+      const f=Math.pow(azar(),1.5);
+      const a=inicio-1-f*largo*.95+(azar()-.5)*1.2;
+      const dispersion=1.5+11*f, r=ESTELA_R+dispersion*(azar()-.3);
+      const [x,y]=puntoArco(r,a);
       const p=document.createElementNS(NS,'circle');
       p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
-      p.setAttribute('r',(0.3+azar()*(1.05-.55*f)).toFixed(2));
-      p.setAttribute('fill',azar()<.68?'#ffffff':'var(--trail)');
-      p.style.opacity=((.42+azar()*.4)*Math.pow(1-f,1.8)).toFixed(2);
-      p.style.filter='drop-shadow(0 0 2px var(--trail))';
-      insertarAntesDelTexto(p);
+      p.setAttribute('r',(.3+azar()*(.95-.5*f)).toFixed(2));
+      p.style.fill=azar()<.6?'#ffffff':'var(--trail)';
+      p.style.opacity=((.4+azar()*.45)*Math.pow(1-f,1.6)).toFixed(2);
+      estela.appendChild(p);
     }
-    const [x,y]=puntoArco(112,fin-1);
-    const aura=document.createElementNS(NS,'circle');
-    aura.setAttribute('cx',x.toFixed(1));aura.setAttribute('cy',y.toFixed(1));
-    aura.setAttribute('r','3.2');aura.setAttribute('fill','var(--trail)');
-    aura.style.opacity='.48';aura.style.filter='drop-shadow(0 0 5px var(--trail))';
-    insertarAntesDelTexto(aura);
+
+    // 7) Coma: halo suave en la cabeza, justo detrás de la primera letra.
+    const grad=document.createElementNS(NS,'radialGradient');
+    grad.id='comaGrad';
+    [['0','.6'],['.5','.18'],['1','0']].forEach(([o,a])=>{
+      const s=document.createElementNS(NS,'stop');
+      s.setAttribute('offset',o);s.style.stopColor='var(--trail)';s.style.stopOpacity=a;
+      grad.appendChild(s);
+    });
+    estela.appendChild(grad);
+    const [cx,cy]=puntoArco(ESTELA_R,inicio-1.5);
+    const coma=document.createElementNS(NS,'circle');
+    coma.setAttribute('cx',cx.toFixed(1));coma.setAttribute('cy',cy.toFixed(1));
+    coma.setAttribute('r','8');coma.setAttribute('fill','url(#comaGrad)');
+    estela.appendChild(coma);
   }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();
 }
+
 setSpinText(spinText);
 
 function mark(id,idx){

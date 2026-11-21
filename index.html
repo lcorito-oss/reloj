@@ -1214,7 +1214,7 @@ function setSpinText(t){
   // Núcleo fino con polvo disperso; el brillo cae hasta desaparecer al final.
   label(t,112,14,sp,'spin');
   try{
-    const fin=-span/2-1, largo=90; // un cuarto exacto del círculo: 90 grados
+    const fin=-span/2-5, largo=90; // pequeño espacio tras el texto; un cuarto exacto del círculo
     const inicio=fin-2, segmentos=24;
     const insertarAntesDelTexto=el=>g.insertBefore(el,g.lastElementChild);
     for(let i=0;i<segmentos;i++){

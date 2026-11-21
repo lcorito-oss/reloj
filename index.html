@@ -1214,7 +1214,7 @@ function setSpinText(t){
   // El texto se monta primero para que siga visible aunque falle algún efecto.
   label(t,112,14,sp,'spin');
   try{
-    const fin=-span/2-1, largo=84; // un cuarto del círculo de la carátula
+    const fin=-span/2-1, largo=Math.PI*112/2; // arco de 90°, del 12 al 3
     const camino=arcoEstela(112,fin-2,fin-2-largo);
     const halo=document.createElementNS(NS,'path');
     halo.setAttribute('d',camino);halo.setAttribute('fill','none');

@@ -1211,33 +1211,40 @@ function setSpinText(t){
   g.replaceChildren();
   const sp=Math.min(14,2*Math.PI*112/(t.length+1));
   const n=t.length, span=(n-1)*sp/112*180/Math.PI;
-  // Núcleo fino y brillante, con polvo azul que se abre hacia atrás.
+  // Núcleo fino con polvo disperso; el brillo cae hasta desaparecer al final.
   label(t,112,14,sp,'spin');
   try{
-    const fin=-span/2-1, largo=Math.PI*112/2; // arco de 90°, del 12 al 3
+    const fin=-span/2-1, largo=90; // un cuarto exacto del círculo: 90 grados
+    const inicio=fin-2, segmentos=24;
     const insertarAntesDelTexto=el=>g.insertBefore(el,g.lastElementChild);
-    const capa=(radio,color,grosor,opacidad)=>{
-      const p=document.createElementNS(NS,'path');
-      p.setAttribute('d',arcoEstela(radio,fin-2,fin-2-largo));
-      p.setAttribute('fill','none');p.setAttribute('stroke',color);
-      p.setAttribute('stroke-width',grosor);p.setAttribute('stroke-linecap','round');
-      p.style.opacity=opacidad;p.style.filter='drop-shadow(0 0 3px var(--trail))';
-      insertarAntesDelTexto(p);
-    };
-    capa(112,'var(--trail)',9,0.12);  // halo neón difuso
-    capa(112,'var(--trail)',3.5,0.28); // cola luminosa
-    capa(112,'#ffffff',1.1,0.72);  // núcleo brillante
+    for(let i=0;i<segmentos;i++){
+      const f=i/(segmentos-1), a=inicio-f*largo,
+            b=inicio-(i+1)*largo/segmentos-0.45;
+      const dibuja=(ancho,opacidad,color)=>{
+        const p=document.createElementNS(NS,'path');
+        p.setAttribute('d',arcoEstela(112,a,b));
+        p.setAttribute('fill','none');p.setAttribute('stroke',color);
+        p.setAttribute('stroke-width',ancho);p.setAttribute('stroke-linecap','round');
+        p.style.opacity=opacidad;p.style.filter='drop-shadow(0 0 3px var(--trail))';
+        insertarAntesDelTexto(p);
+      };
+      const fade=Math.pow(1-f,1.7);
+      dibuja((8*(1-.78*f)).toFixed(2),(0.12*fade).toFixed(3),'var(--trail)');
+      dibuja((3.4*(1-.72*f)).toFixed(2),(0.28*fade).toFixed(3),'var(--trail)');
+      dibuja((1.05*(1-.5*f)).toFixed(2),(0.72*fade).toFixed(3),'#ffffff');
+    }
     let semilla=1234567;
     const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
     for(let i=0;i<120;i++){
-      const f=azar(), a=fin-3-f*largo+(azar()-.5)*2;
+      const f=azar(), a=fin-3-f*largo+(azar()-.5)*1.6;
       const r=112+(azar()-.5)*(2+13*f), [x,y]=puntoArco(r,a);
       const p=document.createElementNS(NS,'circle');
       p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
-      p.setAttribute('r',(0.3+azar()*(1.05-0.55*f)).toFixed(2));
+      p.setAttribute('r',(0.3+azar()*(1.05-.55*f)).toFixed(2));
       p.setAttribute('fill',azar()<.68?'#ffffff':'var(--trail)');
-      p.style.opacity=((.12+azar()*.42)*(1-.72*f)).toFixed(2);
-      p.style.filter='drop-shadow(0 0 2px var(--trail))';insertarAntesDelTexto(p);
+      p.style.opacity=((.42+azar()*.4)*Math.pow(1-f,1.8)).toFixed(2);
+      p.style.filter='drop-shadow(0 0 2px var(--trail))';
+      insertarAntesDelTexto(p);
     }
     const [x,y]=puntoArco(112,fin-1);
     const aura=document.createElementNS(NS,'circle');

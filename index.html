@@ -17,7 +17,7 @@
 
 
 <style>
-:root{--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#91baff;--bg:#080d18;--band:#101a29;--arc:#31425c;--txt:#cbd5e1;color-scheme:dark}
+:root{--day:#ff3b5c;--mon:#4da3ff;--wk:#3ddc84;--glow:#91baff;--trail:#ffffff;--bg:#080d18;--band:#101a29;--arc:#31425c;--txt:#cbd5e1;color-scheme:dark}
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{min-height:100%;height:auto}
 /* Cielo estrellado de fondo en toda la página */
@@ -60,6 +60,7 @@ svg.go .intro,svg.go .avatar{opacity:0}
 svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 .intro text,#spin text{fill:#a9a9a9;font-weight:600}
 #spin text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:400;font-size:14px;fill:#7fb9ff}
+#spin text.trail{fill:var(--trail);filter:url(#trailGlow)}
 .nums text{fill:#ccc;font-weight:600;font-size:13px}
 .nums text:nth-child(2){fill:var(--day)}
 .nums text:nth-child(3){fill:var(--mon)}
@@ -91,6 +92,7 @@ button:hover{border-color:#888;color:#fff}
 #edgeH feFlood{flood-color:var(--wk)}
 #face{filter:url(#neon)}
 #neon feFlood{flood-color:#7fb9ff}
+#trailGlow feFlood{flood-color:var(--trail)}
 #info,#info span{color:#f2f6ff !important}
 /* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
 body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);z-index:0;inset:0;pointer-events:none;background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
@@ -228,6 +230,12 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 <svg id="clock" viewBox="0 0 400 400" role="button" tabindex="0" aria-label="Reloj interactivo. Activa para repetir la presentación.">
   <defs>
     <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
+      <feFlood flood-opacity=".6"/>
+      <feComposite in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="trailGlow" filterUnits="userSpaceOnUse" x="0" y="0" width="400" height="400">
       <feGaussianBlur in="SourceAlpha" stdDeviation="2.4" result="b"/>
       <feFlood flood-opacity=".6"/>
       <feComposite in2="b" operator="in" result="g"/>
@@ -1171,6 +1179,7 @@ function txt(g,t,r,size,angle,color){
   el.setAttribute('transform',`rotate(${angle} 200 200)`);
   if(color)el.dataset.c=color;
   g.appendChild(el);
+  return el;
 }
 function build(id,data,r,size,color){
   data.forEach((t,i)=>txt(document.getElementById(id),t,r,size,i*360/data.length,color));
@@ -1188,7 +1197,27 @@ label('DÍA',178,11,20,'gD');
 label('MES',156,11,18,'gM');
 label('DÍA SEMANA',134,10,14,'gW');
 let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
-function setSpinText(t){document.getElementById('spin').innerHTML='';label(t,112,14,Math.min(14,2*Math.PI*112/(t.length+1)),'spin');}
+// Estela de cometa del texto giratorio: copias fantasma rezagadas en el giro,
+// que giran con el texto y se desvanecen detrás de él, como un cometa.
+const ESTELA_N=8, ESTELA_PASO=5; // 8 fantasmas, 5° cada uno
+function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
+function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
+function setSpinText(t){
+  const g=document.getElementById('spin');
+  g.innerHTML='';
+  const sp=Math.min(14,2*Math.PI*112/(t.length+1));
+  label(t,112,14,sp,'spin');
+  const n=t.length, step=sp/112*180/Math.PI;
+  for(let k=1;k<=ESTELA_N;k++){
+    [...t].forEach((c,i)=>{
+      if(c===' ')return;
+      const el=txt(g,c,112,14,(i-(n-1)/2)*step-k*ESTELA_PASO);
+      el.classList.add('trail');
+      el.style.opacity=((1-k/(ESTELA_N+1))*0.7).toFixed(2);
+    });
+  }
+  actualizarEstela();
+}
 setSpinText(spinText);
 
 function mark(id,idx){
@@ -1234,6 +1263,7 @@ function updateText(){
   const dateText=date.charAt(0).toUpperCase()+date.slice(1);
   const time=d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit',hour12:true});
   info.textContent=`${dateText} · ${time}`;
+  actualizarEstela(); // la estela cambia con el día y la noche
   svg.setAttribute('aria-label',`${dateText}, ${time}. Reloj analógico interactivo. Activa para repetir la presentación.`);
 }
 const MOON_CYCLE_DAYS=29.530588853;

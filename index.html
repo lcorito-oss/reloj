@@ -1208,48 +1208,38 @@ function arcoEstela(r,a1,a2){
 }
 function setSpinText(t){
   const g=document.getElementById('spin');
-  g.innerHTML='';
+  g.replaceChildren();
   const sp=Math.min(14,2*Math.PI*112/(t.length+1));
-  const n=t.length, step=sp/112*180/Math.PI, span=(n-1)*step;
-  // Estela de polvo con un núcleo luminoso junto al texto y filamentos que
-  // se abren y pierden brillo gradualmente hacia atrás.
-  const fin=-span/2-1, LARGO=168, SEGMENTOS=18, PARTICULAS=190;
-  let semilla=1234567;
-  const azar=()=>{semilla=(semilla*1103515245+12345)%2147483648;return semilla/2147483648;};
-  const camino=(a,b)=>arcoEstela(112,a,b);
-  const trazo=(d,grosor,opacidad,color='var(--trail)')=>{
-    const p=document.createElementNS(NS,'path');
-    p.setAttribute('d',d);p.setAttribute('fill','none');
-    p.setAttribute('stroke',color);p.setAttribute('stroke-width',grosor);
-    p.setAttribute('stroke-linecap','round');p.style.opacity=opacidad;
-    p.setAttribute('filter','url(#trailGlow)');g.appendChild(p);
-  };
-  // El haz se divide en tramos para afinarlo de forma natural.
-  for(let i=0;i<SEGMENTOS;i++){
-    const f=1-i/SEGMENTOS, a=fin-2-i*(LARGO/SEGMENTOS),
-          b=fin-2-(i+1)*(LARGO/SEGMENTOS);
-    trazo(camino(a,b),(1.1+f*7.2).toFixed(2),(0.015+f*f*0.16).toFixed(3));
-    if(i<7) trazo(camino(a,b),(0.45+f*2.2).toFixed(2),(0.04+f*0.2).toFixed(3),'#ffffff');
-  }
-  // Granulado más denso y brillante cerca de la cabeza; motas dispersas al final.
-  for(let i=0;i<PARTICULAS;i++){
-    const f=Math.pow(azar(),0.78), a=fin-2-f*LARGO+(azar()-0.5)*2.4;
-    const ancho=2+15*f, r=112+(azar()-0.5)*ancho;
-    const [x,y]=puntoArco(r,a), c=document.createElementNS(NS,'circle');
-    c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',y.toFixed(1));
-    c.setAttribute('r',(0.25+azar()*(0.55+1.45*(1-f))).toFixed(2));
-    c.style.fill=azar()<0.58?'#ffffff':'var(--trail)';
-    c.style.opacity=((0.06+azar()*0.32)*(1-0.72*f)).toFixed(2);
-    if(azar()<0.18)c.setAttribute('filter','url(#trailGlow)');
-    g.appendChild(c);
-  }
-  // Destello concentrado al inicio de la estela.
-  const [hx,hy]=puntoArco(112,fin-1);
-  const halo=document.createElementNS(NS,'circle');
-  halo.setAttribute('cx',hx.toFixed(1));halo.setAttribute('cy',hy.toFixed(1));halo.setAttribute('r','4.8');
-  halo.setAttribute('fill','var(--trail)');halo.style.opacity='0.28';halo.setAttribute('filter','url(#neon)');
-  g.appendChild(halo);
+  const n=t.length, span=(n-1)*sp/112*180/Math.PI;
+  // El texto se monta primero para que siga visible aunque falle algún efecto.
   label(t,112,14,sp,'spin');
+  try{
+    const fin=-span/2-1, largo=168;
+    const camino=arcoEstela(112,fin-2,fin-2-largo);
+    const halo=document.createElementNS(NS,'path');
+    halo.setAttribute('d',camino);halo.setAttribute('fill','none');
+    halo.setAttribute('stroke','var(--trail)');halo.setAttribute('stroke-width','7');
+    halo.setAttribute('stroke-linecap','round');halo.style.opacity='0.14';
+    halo.setAttribute('filter','url(#trailGlow)');
+    g.insertBefore(halo,g.firstChild);
+    const nucleo=document.createElementNS(NS,'path');
+    nucleo.setAttribute('d',camino);nucleo.setAttribute('fill','none');
+    nucleo.setAttribute('stroke','#ffffff');nucleo.setAttribute('stroke-width','1.8');
+    nucleo.setAttribute('stroke-linecap','round');nucleo.style.opacity='0.28';
+    g.insertBefore(nucleo,g.firstChild);
+    let semilla=1234567;
+    const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
+    for(let i=0;i<100;i++){
+      const f=azar(), a=fin-3-f*largo+(azar()-.5)*2;
+      const r=112+(azar()-.5)*(2+11*f), [x,y]=puntoArco(r,a);
+      const p=document.createElementNS(NS,'circle');
+      p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
+      p.setAttribute('r',(0.35+azar()*1.1).toFixed(2));
+      p.setAttribute('fill',azar()<.55?'#ffffff':'var(--trail)');
+      p.style.opacity=((.08+azar()*.34)*(1-.65*f)).toFixed(2);
+      g.insertBefore(p,g.firstChild);
+    }
+  }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();
 }
 function mark(id,idx){

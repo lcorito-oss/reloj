@@ -51,7 +51,7 @@ svg:focus-visible{outline:2px solid var(--glow);outline-offset:6px;border-radius
 text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--txt);text-anchor:middle;dominant-baseline:central}
 text.on{font-weight:700}
 #rDay text,#rMon text,#rWk text{opacity:.5;filter:blur(.2px);font-size:8px;transition:opacity .6s,font-size .6s}
-#rDay text.on,#rMon text.on,#rWk text.on{opacity:1;filter:none;font-size:11px} /* valor actual más chico para que quepa dentro de su banda */
+#rDay text.on,#rMon text.on,#rWk text.on{opacity:1;filter:none;font-size:14px}
 .data,.live,.intro,.avatar{transition:opacity .8s}
 .data,.live{opacity:0}
 svg.go .data,svg.go .live{opacity:1}
@@ -1435,7 +1435,7 @@ function setCalendar(){
   const d=new Date(), day=d.getDate()-1, m=d.getMonth(), w=d.getDay();
   const n=new Date(d.getFullYear(),m+1,0).getDate();
   if(n!==dim)buildDays(n);
-  band('aS',178,day*360/n+offs.D,360/n);band('aM',156,m*30+offs.M,30);band('aH',134,w*360/7+offs.W,360/7);
+  band('aS',178,day*360/n+offs.D,360/n*1.5);band('aM',156,m*30+offs.M,30);band('aH',134,w*360/7+offs.W,360/7*1.25); /* arcos más largos para que el rótulo (DÍA, DÍA SEMANA) quepa dentro de la pastilla */
   mark('rDay',day);mark('rMon',m);mark('rWk',w);
   markEventDays();
 }

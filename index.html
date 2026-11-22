@@ -1337,7 +1337,7 @@ function setSpinText(t){
       const p=document.createElementNS(NS,'circle');
       p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
       p.setAttribute('r',(.3+azar()*(.95-.5*f)).toFixed(2));
-      p.style.fill=azar()<.6?'#ffffff':'var(--trail)';
+      const rc=azar();p.style.fill=rc<.4?'#ffffff':rc<.7?'#ffc978':'var(--trail)'; // blancas, doradas y verdes
       const opPolvo=((.4+azar()*.45)*Math.pow(1-f,1.6)).toFixed(2);
       if(!ESTELA_LIGERA&&i%3===0){ // en computadora, unas motitas titilan despacio
         p.classList.add('polvo-titila');
@@ -1403,7 +1403,7 @@ function soltarPolvo(){
     const c=document.createElementNS(NS,'circle');
     c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',y.toFixed(1));
     c.setAttribute('r',(.35+Math.random()*.9).toFixed(2));
-    c.style.fill=Math.random()<.55?'#ffffff':'var(--trail)';
+    const rc=Math.random();c.style.fill=rc<.4?'#ffffff':rc<.7?'#ffc978':'var(--trail)'; // blancas, doradas y verdes
     c.style.setProperty('--v',(3.2+Math.random()*3.3).toFixed(1)+'s');
     c.style.setProperty('--o',(.45+Math.random()*.4).toFixed(2));
     c.style.setProperty('--dx',(rx*m+tx*t).toFixed(1)+'px');
@@ -1607,7 +1607,7 @@ function dibujarPolvoReloj(){
     const p=document.createElementNS(NS,'circle');
     p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
     p.setAttribute('r',(.4+azar()*.9).toFixed(2));
-    p.style.fill='#eaf2ff';
+    const rc=azar();p.style.fill=rc<.4?'#ffffff':rc<.7?'#ffc978':'var(--trail)'; // blancas, doradas y verdes
     const op=(.15+azar()*.35).toFixed(2);
     if(!ESTELA_LIGERA&&i%3===0){
       p.classList.add('polvo-titila');

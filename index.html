@@ -61,12 +61,6 @@ svg.bD #aS,svg.bM #aM,svg.bW #aH{opacity:1}
 .intro text,#spin text{fill:#a9a9a9;font-weight:600}
 #spin text{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:400;font-size:14px;fill:#7fb9ff}
 #spin text.trail{fill:var(--trail);filter:url(#trailGlow)}
-/* La estela cambia de color con el avance del día y la noche, de manera suave */
-#spin .estela *{transition:fill 60s linear,stroke 60s linear,stop-color 60s linear}
-.polvo-titila{animation:titilar 3.2s ease-in-out infinite}
-@keyframes titilar{0%,100%{opacity:var(--op,1)}50%{opacity:calc(var(--op,1)*.2)}}
-#spin .nucleo{animation:respirar 4s ease-in-out infinite}
-@keyframes respirar{0%,100%{opacity:.85}50%{opacity:1}}
 .nums text{fill:#ccc;font-weight:600;font-size:13px}
 .nums text:nth-child(2){fill:var(--day)}
 .nums text:nth-child(3){fill:var(--mon)}
@@ -102,7 +96,7 @@ button:hover{border-color:#888;color:#fff}
 #info,#info span{color:#f2f6ff !important}
 /* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
 body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);z-index:0;inset:0;pointer-events:none;background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
-.app-shell{position:relative;width:min(100%,980px);margin:auto;z-index:2}
+.app-shell{position:relative;width:min(100%,1100px);margin:auto;z-index:2}
 .app-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 22px;padding:0 4px}
 .eyebrow,.section-kicker{color:#91baff;font-size:.72rem;font-weight:750;letter-spacing:.18em;text-transform:uppercase}
 .lede{margin-top:10px;max-width:38rem;color:#9eacc2;font-size:.96rem;line-height:1.6}
@@ -344,8 +338,6 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
     <line id="hS" x1="200" y1="218" x2="200" y2="114" stroke-width="1.5" stroke-linecap="round"/>
     <circle cx="200" cy="200" r="4" fill="#fff"/>
   </g>
-  <!-- motitas brillantes en todo el reloj -->
-  <g id="polvoReloj"></g>
 </svg>
     </div>
     <div class="clock-details">
@@ -1207,19 +1199,7 @@ label('DÍA SEMANA',134,10,14,'gW');
 let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
 // Estela de cometa del texto giratorio: un haz luminoso que persigue al
 // texto por el mismo arco, como la cola de un cometa, y se desvanece.
-// El color de la estela cambia de manera suave con el avance del día y la
-// noche: verde de noche, blanco de día, con el amanecer (5-7 h) y el
-// anochecer (18-20 h) como transiciones graduales.
-function mezclarColor(a,b,t){const m=(x,y)=>Math.round(x+(y-x)*t);return `rgb(${m(a[0],b[0])},${m(a[1],b[1])},${m(a[2],b[2])})`;}
-function colorEstela(){
-  const d=new Date(), h=d.getHours()+d.getMinutes()/60;
-  const verde=[61,220,132], blanco=[255,255,255];
-  const suave=t=>{t=Math.min(1,Math.max(0,t));return t*t*(3-2*t);};
-  if(h>=7&&h<18) return '#ffffff';        // día
-  if(h>=20||h<5) return '#3ddc84';         // noche
-  if(h>=5&&h<7) return mezclarColor(verde,blanco,suave((h-5)/2)); // amanecer
-  return mezclarColor(blanco,verde,suave((h-18)/2));               // anochecer
-}
+function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
 function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
 function puntoArco(r,deg){const a=deg*Math.PI/180;return [200+r*Math.sin(a),200-r*Math.cos(a)];}
 /* ==================================================================
@@ -1283,7 +1263,6 @@ function setSpinText(t){
     const inicio=-span/2-3, largo=90, q=ESTELA_LIGERA?.6:1;
     const N=k=>Math.max(6,Math.round(k*q));
     const estela=document.createElementNS(NS,'g');
-    estela.setAttribute('class','estela');
     g.insertBefore(estela,g.firstChild); // siempre debajo de las letras
 
     // Capa difusa (una sola vez desenfocada): cola de polvo + resplandor de iones.
@@ -1321,13 +1300,7 @@ function setSpinText(t){
       p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
       p.setAttribute('r',(.3+azar()*(.95-.5*f)).toFixed(2));
       p.style.fill=azar()<.6?'#ffffff':'var(--trail)';
-      const opPolvo=((.4+azar()*.45)*Math.pow(1-f,1.6)).toFixed(2);
-      if(!ESTELA_LIGERA&&i%3===0){ // en computadora, unas motitas titilan despacio
-        p.classList.add('polvo-titila');
-        p.style.setProperty('--op',opPolvo);
-        p.style.animationDuration=(2.6+(i%5)*0.6)+'s';
-        p.style.animationDelay=(-(i%7)*0.6)+'s';
-      } else p.style.opacity=opPolvo;
+      p.style.opacity=((.4+azar()*.45)*Math.pow(1-f,1.6)).toFixed(2);
       estela.appendChild(p);
     }
 
@@ -1345,22 +1318,6 @@ function setSpinText(t){
     coma.setAttribute('cx',cx.toFixed(1));coma.setAttribute('cy',cy.toFixed(1));
     coma.setAttribute('r','8');coma.setAttribute('fill','url(#comaGrad)');
     estela.appendChild(coma);
-
-    // 8) Núcleo: punto brillante en la punta delantera del texto, la cabeza del cometa.
-    const gradN=document.createElementNS(NS,'radialGradient');
-    gradN.id='nucleoGrad';
-    [['0','.95'],['.35','.45'],['1','0']].forEach(([o,a])=>{
-      const s=document.createElementNS(NS,'stop');
-      s.setAttribute('offset',o);s.style.stopColor=o==='0'?'#ffffff':'var(--trail)';s.style.stopOpacity=a;
-      gradN.appendChild(s);
-    });
-    estela.appendChild(gradN);
-    const [nx,ny]=puntoArco(ESTELA_R,span/2+1.5);
-    const nucleo=document.createElementNS(NS,'circle');
-    nucleo.setAttribute('cx',nx.toFixed(1));nucleo.setAttribute('cy',ny.toFixed(1));
-    nucleo.setAttribute('r','7');nucleo.setAttribute('fill','url(#nucleoGrad)');
-    nucleo.setAttribute('class','nucleo');
-    estela.appendChild(nucleo);
   }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();
 }
@@ -1543,32 +1500,7 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-// Motitas brillantes en todo el reloj: polvo quieto sobre la carátula,
-// unas titilan despacio (solo en computadora).
-function dibujarPolvoReloj(){
-  const g=document.getElementById('polvoReloj');
-  if(!g||g.children.length)return;
-  let semilla=987654;
-  const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
-  const total=ESTELA_LIGERA?36:60;
-  for(let i=0;i<total;i++){
-    const a=azar()*360, rr=100+azar()*95; // anillo de la carátula, fuera del búho
-    const [x,y]=puntoArco(rr,a);
-    const p=document.createElementNS(NS,'circle');
-    p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
-    p.setAttribute('r',(.4+azar()*.9).toFixed(2));
-    p.style.fill='#eaf2ff';
-    const op=(.15+azar()*.35).toFixed(2);
-    if(!ESTELA_LIGERA&&i%3===0){
-      p.classList.add('polvo-titila');
-      p.style.setProperty('--op',op);
-      p.style.animationDuration=(2.8+(i%5)*0.7)+'s';
-      p.style.animationDelay=(-(i%7)*0.7)+'s';
-    } else p.style.opacity=op;
-    g.appendChild(p);
-  }
-}
-applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();dibujarPolvoReloj();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});
@@ -1709,6 +1641,15 @@ document.getElementById('gcalOff').addEventListener('click',()=>{
 setInterval(()=>{if(gcTokenOk())gcRefresh();},600000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gcConnected()&&!gcTokenOk()&&gClient){gUserClick=false;try{gClient.requestAccessToken({prompt:''});}catch(e){}}});
 gcLoadCache();gcRender();gcLoadScript();
+// Escala reloj + tarjetas en pantallas grandes (el diseño base mide ~1040×570 px).
+// En móvil y tablets el factor queda en 1 y no cambia nada.
+function ajustarEscala(){
+  let z=Math.min(innerWidth/1040,innerHeight/570,2.4);
+  if(z<1.05)z=1;
+  document.querySelector('.app-shell').style.zoom=z.toFixed(3);
+}
+ajustarEscala();
+window.addEventListener('resize',ajustarEscala);
 drawSky();
 window.addEventListener('resize',drawSky);
 window.addEventListener('scroll',drawSky,{passive:true});

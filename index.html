@@ -97,6 +97,11 @@ button:hover{border-color:#888;color:#fff}
 /* Mantén un fondo oscuro y despejado para que destaquen las estrellas calculadas. */
 body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 24%,#91baff22 0 1px,transparent 2px),radial-gradient(circle at 83% 18%,#91baff1c 0 1px,transparent 2px),radial-gradient(circle at 74% 77%,#91baff18 0 1px,transparent 2px);z-index:0;inset:0;pointer-events:none;background-image:radial-gradient(ellipse at 18% 30%,#6378a512,transparent 42%),radial-gradient(ellipse at 82% 68%,#536caa10,transparent 44%);background-size:100% 100%;background-position:center;opacity:.55}
 .app-shell{position:relative;width:min(100%,1100px);margin:auto;z-index:2}
+#info{text-wrap:balance}
+/* Polvo que suelta la estela: queda fijo sobre el reloj, se va a la deriva y se desvanece. */
+#polvo{pointer-events:none}
+#polvo circle{animation:polvoVuela var(--v,4s) ease-out forwards}
+@keyframes polvoVuela{0%{opacity:var(--o,.6);transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx,0px),var(--dy,0px))}}
 .app-header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 22px;padding:0 4px}
 .eyebrow,.section-kicker{color:#91baff;font-size:.72rem;font-weight:750;letter-spacing:.18em;text-transform:uppercase}
 .lede{margin-top:10px;max-width:38rem;color:#9eacc2;font-size:.96rem;line-height:1.6}
@@ -1199,7 +1204,29 @@ label('DÍA SEMANA',134,10,14,'gW');
 let spinText='HELL-OW';try{spinText=localStorage.getItem('relojText')||spinText;}catch(e){}
 // Estela de cometa del texto giratorio: un haz luminoso que persigue al
 // texto por el mismo arco, como la cola de un cometa, y se desvanece.
-function colorEstela(){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // blanca de día, verde de noche
+// Color de la estela: blanca de día y verde de noche. El color sigue la altura del sol,
+// así que cambia poco a poco a lo largo de todo el atardecer y todo el amanecer:
+// blanco con el sol alto, verde cuando ya es de noche cerrada y tonos intermedios en medio.
+const ALTURA_DIA=10;     // grados: con el sol a esta altura o más, la estela es blanca
+const ALTURA_NOCHE=-14;  // grados: con el sol a esta altura o menos, la estela es verde
+function alturaSol(ms){ // altura del sol en grados para SKY_LAT/SKY_LON (fórmulas NOAA, sin refracción)
+  const y=new Date(ms).getUTCFullYear(), F=(ms-Date.UTC(y,0,0))/864e5, g=2*Math.PI/365*(F-1.5);
+  const eqt=229.18*(.000075+.001868*Math.cos(g)-.032077*Math.sin(g)-.014615*Math.cos(2*g)-.040849*Math.sin(2*g));
+  const dec=.006918-.399912*Math.cos(g)+.070257*Math.sin(g)-.006758*Math.cos(2*g)+.000907*Math.sin(2*g)-.002697*Math.cos(3*g)+.00148*Math.sin(3*g);
+  const utcMin=((ms/6e4)%1440+1440)%1440, tst=(((utcMin+eqt+4*SKY_LON)%1440)+1440)%1440;
+  const ha=(tst/4-180)*Math.PI/180, lat=SKY_LAT*Math.PI/180;
+  return Math.asin(Math.sin(lat)*Math.sin(dec)+Math.cos(lat)*Math.cos(dec)*Math.cos(ha))*180/Math.PI;
+}
+function factorNoche(ms){ // 0 = día pleno, 1 = noche plena
+  const u=Math.max(0,Math.min(1,(ALTURA_DIA-alturaSol(ms))/(ALTURA_DIA-ALTURA_NOCHE)));
+  return u*u*(3-2*u); // suavizado: arranca y termina despacio
+}
+function colorEstela(){
+  const nf=factorNoche(Date.now());
+  if(!isFinite(nf)){const h=new Date().getHours();return (h>=6&&h<19)?'#ffffff':'#3ddc84';} // respaldo
+  const dia=[255,255,255], noche=[61,220,132];  // blanco → verde
+  return '#'+dia.map((v,k)=>Math.round(v+(noche[k]-v)*nf).toString(16).padStart(2,'0')).join('');
+}
 function actualizarEstela(){document.documentElement.style.setProperty('--trail',colorEstela());}
 function puntoArco(r,deg){const a=deg*Math.PI/180;return [200+r*Math.sin(a),200-r*Math.cos(a)];}
 /* ==================================================================
@@ -1208,6 +1235,7 @@ function puntoArco(r,deg){const a=deg*Math.PI/180;return [200+r*Math.sin(a),200-
    ya no se usa). Conserva colorEstela, actualizarEstela y puntoArco.
    ================================================================== */
 const ESTELA_R=112;
+const estelaGeom={inicio:-30,largo:90}; // la actualiza setSpinText; la usa el polvo suelto
 // En móvil: sin desenfoque y con menos piezas, para cuidar batería y fluidez.
 const ESTELA_LIGERA=matchMedia('(pointer:coarse)').matches;
 
@@ -1261,6 +1289,7 @@ function setSpinText(t){
   label(t,ESTELA_R,14,sp,'spin');
   try{
     const inicio=-span/2-3, largo=90, q=ESTELA_LIGERA?.6:1;
+    estelaGeom.inicio=inicio;estelaGeom.largo=largo;
     const N=k=>Math.max(6,Math.round(k*q));
     const estela=document.createElementNS(NS,'g');
     g.insertBefore(estela,g.firstChild); // siempre debajo de las letras
@@ -1321,6 +1350,39 @@ function setSpinText(t){
   }catch(e){console.warn('No se pudo dibujar la estela:',e);}
   actualizarEstela();
 }
+
+// ---- Polvo suelto: la estela deja partículas fijas sobre el reloj que se desvanecen ----
+const polvo=document.createElementNS(NS,'g');
+polvo.id='polvo';
+svg.insertBefore(polvo,svg.querySelector('.live.nums')); // sobre la esfera, bajo números y manecillas
+function soltarPolvo(){
+  if(RM||document.hidden)return;
+  const th=(Date.now()/1000*6)%360;                // mismo ángulo con que gira #spin
+  const n=ESTELA_LIGERA?1+(Math.random()<.5?1:0):2+(Math.random()<.5?1:0);
+  for(let i=0;i<n;i++){
+    const f=Math.pow(Math.random(),1.4)*.6;        // sale del 60 % delantero de la cola
+    const a=th+estelaGeom.inicio-f*estelaGeom.largo+(Math.random()-.5)*1.2;
+    const r=ESTELA_R+(Math.random()-.35)*(2+9*f);
+    const [x,y]=puntoArco(r,a);
+    const rx=(x-200)/r, ry=(y-200)/r;              // radial (hacia afuera)
+    const tx=Math.cos(a*Math.PI/180), ty=Math.sin(a*Math.PI/180); // tangente en el sentido del giro
+    const adentro=Math.random()<.7;                // la mayoría cae hacia la esfera
+    const m=adentro?-(3+Math.random()*11):(2+Math.random()*4);
+    const t=(Math.random()-.5)*5;
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',x.toFixed(1));c.setAttribute('cy',y.toFixed(1));
+    c.setAttribute('r',(.35+Math.random()*.9).toFixed(2));
+    c.style.fill=Math.random()<.55?'#ffffff':'var(--trail)';
+    c.style.setProperty('--v',(3.2+Math.random()*3.3).toFixed(1)+'s');
+    c.style.setProperty('--o',(.45+Math.random()*.4).toFixed(2));
+    c.style.setProperty('--dx',(rx*m+tx*t).toFixed(1)+'px');
+    c.style.setProperty('--dy',(ry*m+ty*t).toFixed(1)+'px');
+    c.addEventListener('animationend',()=>c.remove(),{once:true});
+    polvo.appendChild(c);
+  }
+  while(polvo.childElementCount>260)polvo.firstChild.remove(); // tope de seguridad
+}
+setInterval(soltarPolvo,ESTELA_LIGERA?160:90);
 
 setSpinText(spinText);
 
@@ -1641,12 +1703,21 @@ document.getElementById('gcalOff').addEventListener('click',()=>{
 setInterval(()=>{if(gcTokenOk())gcRefresh();},600000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gcConnected()&&!gcTokenOk()&&gClient){gUserClick=false;try{gClient.requestAccessToken({prompt:''});}catch(e){}}});
 gcLoadCache();gcRender();gcLoadScript();
-// Escala reloj + tarjetas en pantallas grandes (el diseño base mide ~1040×570 px).
+// Escala el reloj en pantallas grandes (el diseño base mide ~1040×570 px).
+// Las tarjetas de la derecha crecen menos que el reloj: DETALLES_MAX es su escala máxima.
 // En móvil y tablets el factor queda en 1 y no cambia nada.
+const DETALLES_MAX=1.25;
 function ajustarEscala(){
   let z=Math.min(innerWidth/1040,innerHeight/570,2.4);
   if(z<1.05)z=1;
+  const det=document.querySelector('.clock-details');
   document.querySelector('.app-shell').style.zoom=z.toFixed(3);
+  if(z>1){
+    det.style.zoom=(Math.min(z,DETALLES_MAX)/z).toFixed(3);
+    det.style.width='100%';det.style.maxWidth='470px';det.style.justifySelf='center';
+  }else{
+    det.style.zoom='';det.style.width='';det.style.maxWidth='';det.style.justifySelf='';
+  }
 }
 ajustarEscala();
 window.addEventListener('resize',ajustarEscala);

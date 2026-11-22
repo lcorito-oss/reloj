@@ -1605,7 +1605,7 @@ const TOTAL_ESTRELLAS=ESTELA_LIGERA?36:60;
 function nacerEstrella(inicial){
   const g=document.getElementById('polvoReloj');
   if(!g)return;
-  const a=Math.random()*360, rr=100+Math.random()*95; // anillo de la carátula, fuera del búho
+  const a=Math.random()*360, rr=Math.sqrt(Math.random())*178; // toda la carátula, del centro al círculo de los días
   const [x,y]=puntoArco(rr,a);
   const p=document.createElementNS(NS,'circle');
   p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));

@@ -102,6 +102,11 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 @keyframes titilar{0%,100%{opacity:var(--op,1)}50%{opacity:calc(var(--op,1)*.2)}}
 #spin .nucleo{animation:respirar 4s ease-in-out infinite}
 @keyframes respirar{0%,100%{opacity:.85}50%{opacity:1}}
+/* Las estrellitas de la carátula nacen, titilan y mueren como estrellas de verdad */
+.estrella{animation:vidaEstrella var(--vida,12s) ease-in-out both}
+.estrella.supernova{animation-name:vidaSupernova}
+@keyframes vidaEstrella{0%{opacity:0}8%{opacity:var(--op,1)}20%{opacity:calc(var(--op,1)*.3)}32%{opacity:var(--op,1)}46%{opacity:calc(var(--op,1)*.45)}60%{opacity:var(--op,1)}72%{opacity:calc(var(--op,1)*.25)}84%{opacity:calc(var(--op,1)*.7)}100%{opacity:0}}
+@keyframes vidaSupernova{0%{opacity:0}8%{opacity:var(--op,1)}25%{opacity:calc(var(--op,1)*.35)}45%{opacity:var(--op,1)}60%{opacity:calc(var(--op,1)*.5)}78%{opacity:1}88%{opacity:calc(var(--op,1)*.4)}100%{opacity:0}}
 .app-shell{position:relative;width:min(100%,1100px);margin:auto;z-index:2}
 #info{text-wrap:balance}
 /* Polvo que suelta la estela: queda fijo sobre el reloj, se va a la deriva y se desvanece. */
@@ -1593,31 +1598,40 @@ function play(){
   later(()=>{setCalendar();svg.classList.add('go');},6200);
 }
 
-// Motitas brillantes en todo el reloj: polvo quieto sobre la carátula,
-// unas titilan despacio (solo en computadora).
+// Estrellitas sobre la carátula: nacen, titilan y mueren como estrellas de verdad.
+// Unas se apagan despacio (enanas blancas) y pocas mueren con un destello (supernovas);
+// el cielo se renueva solo, nacen estrellas nuevas donde mueren las viejas.
+const TOTAL_ESTRELLAS=ESTELA_LIGERA?36:60;
+function nacerEstrella(inicial){
+  const g=document.getElementById('polvoReloj');
+  if(!g)return;
+  const a=Math.random()*360, rr=100+Math.random()*95; // anillo de la carátula, fuera del búho
+  const [x,y]=puntoArco(rr,a);
+  const p=document.createElementNS(NS,'circle');
+  p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
+  p.setAttribute('r',(.4+Math.random()*.9).toFixed(2));
+  const rc=Math.random();p.style.fill=rc<.4?'#ffffff':rc<.7?'#ffc978':'var(--trail)'; // blancas, doradas y verdes
+  p.style.setProperty('--op',(.15+Math.random()*.35).toFixed(2));
+  p.classList.add('estrella');
+  if(Math.random()<.16)p.classList.add('supernova'); // pocas mueren con destello
+  const vida=8+Math.random()*12; // viven de 8 a 20 s
+  p.style.setProperty('--vida',vida.toFixed(1)+'s');
+  if(inicial)p.style.animationDelay=(-Math.random()*vida).toFixed(1)+'s'; // cada una en su etapa de la vida
+  p.addEventListener('animationend',()=>p.remove(),{once:true});
+  g.appendChild(p);
+}
 function dibujarPolvoReloj(){
   const g=document.getElementById('polvoReloj');
   if(!g||g.children.length)return;
-  let semilla=987654;
-  const azar=()=>{semilla=(semilla*16807)%2147483647;return semilla/2147483647;};
-  const total=ESTELA_LIGERA?36:60;
-  for(let i=0;i<total;i++){
-    const a=azar()*360, rr=100+azar()*95; // anillo de la carátula, fuera del búho
-    const [x,y]=puntoArco(rr,a);
-    const p=document.createElementNS(NS,'circle');
-    p.setAttribute('cx',x.toFixed(1));p.setAttribute('cy',y.toFixed(1));
-    p.setAttribute('r',(.4+azar()*.9).toFixed(2));
-    const rc=azar();p.style.fill=rc<.4?'#ffffff':rc<.7?'#ffc978':'var(--trail)'; // blancas, doradas y verdes
-    const op=(.15+azar()*.35).toFixed(2);
-    if(!ESTELA_LIGERA&&i%3===0){
-      p.classList.add('polvo-titila');
-      p.style.setProperty('--op',op);
-      p.style.animationDuration=(2.8+(i%5)*0.7)+'s';
-      p.style.animationDelay=(-(i%7)*0.7)+'s';
-    } else p.style.opacity=op;
-    g.appendChild(p);
-  }
+  for(let i=0;i<TOTAL_ESTRELLAS;i++)nacerEstrella(true);
 }
+// El cielo se renueva: nacen estrellas nuevas para reemplazar a las que mueren.
+setInterval(()=>{
+  const g=document.getElementById('polvoReloj');
+  if(!g||document.hidden||RM)return;
+  const faltan=TOTAL_ESTRELLAS-g.children.length;
+  for(let i=0;i<Math.min(faltan,5);i++)nacerEstrella(false);
+},1000);
 applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();dibujarPolvoReloj();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});

@@ -1372,7 +1372,7 @@ function setSpinText(t){
       gradN.appendChild(s);
     });
     estela.appendChild(gradN);
-    const [nx,ny]=puntoArco(ESTELA_R,span/2+1.5);
+    const [nx,ny]=puntoArco(ESTELA_R,span/2+5);
     const nucleo=document.createElementNS(NS,'circle');
     nucleo.setAttribute('cx',nx.toFixed(1));nucleo.setAttribute('cy',ny.toFixed(1));
     nucleo.setAttribute('r','7');nucleo.setAttribute('fill','url(#nucleoGrad)');

@@ -1520,15 +1520,27 @@ function weatherIcon(code){
   if(code>=95)return '⛈️';
   return '';
 }
-// Temperatura de hoy (Open-Meteo, gratis y sin clave): actual + máx/mín PRONOSTICADAS del día.
+// Temperatura de hoy (Open-Meteo): actual + máx/mín REALES de lo que va del día,
+// de las horas ya pasadas. Si no hay horas pasadas, usa el pronóstico del día.
 async function updateWeather(){
   try{
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SKY_LAT}&longitude=${SKY_LON}&daily=temperature_2m_max,temperature_2m_min&current=temperature_2m,weather_code&timezone=America%2FChihuahua&forecast_days=1`;
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SKY_LAT}&longitude=${SKY_LON}&hourly=temperature_2m&daily=temperature_2m_max,temperature_2m_min&current=temperature_2m,weather_code&timezone=America%2FChihuahua&forecast_days=1`;
     const r=await fetch(url);
     if(!r.ok)return;
     const d=await r.json();
-    const cur=d.current&&d.current.temperature_2m, mx=d.daily&&d.daily.temperature_2m_max&&d.daily.temperature_2m_max[0], mn=d.daily&&d.daily.temperature_2m_min&&d.daily.temperature_2m_min[0];
-    if(cur==null||mx==null||mn==null)return;
+    const cur=d.current&&d.current.temperature_2m;
+    if(cur==null)return;
+    let mx=null,mn=null;
+    const horas=d.hourly&&d.hourly.time, temps=d.hourly&&d.hourly.temperature_2m, ahora=d.current&&d.current.time;
+    if(horas&&temps&&ahora){
+      const pas=temps.filter((t,i)=>horas[i]<=ahora&&t!=null);
+      if(pas.length){mx=Math.max(...pas);mn=Math.min(...pas);}
+    }
+    if(mx==null||mn==null){
+      mx=d.daily&&d.daily.temperature_2m_max&&d.daily.temperature_2m_max[0];
+      mn=d.daily&&d.daily.temperature_2m_min&&d.daily.temperature_2m_min[0];
+    }
+    if(mx==null||mn==null)return;
     const f=v=>`${Math.round(v)}°`;
     const icon=weatherIcon(d.current&&d.current.weather_code);
     document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· Máx ${f(mx)} · Mín ${f(mn)}</span>`;

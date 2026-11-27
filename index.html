@@ -187,6 +187,7 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 .moon-stats{display:grid;gap:7px;margin-top:16px}
 .moon-stats div{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9ba8bc;font-size:.82rem}
 .moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums}
+.moon-stats .temp-mm{font-size:.8em}
 @media(max-width:700px){
   .moon-card{grid-template-columns:minmax(96px,.55fr) minmax(0,1.45fr);gap:13px;margin-top:18px;padding:16px}
   .moon-symbol{width:min(100%,142px)}
@@ -1528,7 +1529,7 @@ async function updateWeather(){
     if(cur==null||mx==null||mn==null)return;
     const f=v=>`${Math.round(v)}°`;
     const icon=weatherIcon(d.current&&d.current.weather_code);
-    document.getElementById('moon-temp').textContent=`${icon?icon+' ':''}${f(cur)} · Máx ${f(mx)} · Mín ${f(mn)}`;
+    document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· Máx ${f(mx)} · Mín ${f(mn)}</span>`;
   }catch(e){}
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}

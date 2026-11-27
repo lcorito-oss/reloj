@@ -1520,29 +1520,18 @@ function weatherIcon(code){
   if(code>=95)return '⛈️';
   return '';
 }
-// Máx/mín REALES del día: el reloj registra la temperatura cada vez que actualiza
-// y guarda en el celular la más alta y la más baja que ha visto hoy. Se reinicia cada día.
-function registrarTempHoy(cur){
-  const hoy=new Date().toLocaleDateString('es-MX');
-  let reg=null;
-  try{reg=JSON.parse(localStorage.getItem('relojTempHoy')||'null');}catch(e){}
-  if(!reg||reg.fecha!==hoy)reg={fecha:hoy,max:cur,min:cur};
-  else{reg.max=Math.max(reg.max,cur);reg.min=Math.min(reg.min,cur);}
-  try{localStorage.setItem('relojTempHoy',JSON.stringify(reg));}catch(e){}
-  return reg;
-}
+// Temperatura de hoy (Open-Meteo, gratis y sin clave): actual + máx/mín PRONOSTICADAS del día.
 async function updateWeather(){
   try{
-    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SKY_LAT}&longitude=${SKY_LON}&current=temperature_2m,weather_code&timezone=America%2FChihuahua&forecast_days=1`;
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SKY_LAT}&longitude=${SKY_LON}&daily=temperature_2m_max,temperature_2m_min&current=temperature_2m,weather_code&timezone=America%2FChihuahua&forecast_days=1`;
     const r=await fetch(url);
     if(!r.ok)return;
     const d=await r.json();
-    const cur=d.current&&d.current.temperature_2m;
-    if(cur==null)return;
-    const reg=registrarTempHoy(cur);
+    const cur=d.current&&d.current.temperature_2m, mx=d.daily&&d.daily.temperature_2m_max&&d.daily.temperature_2m_max[0], mn=d.daily&&d.daily.temperature_2m_min&&d.daily.temperature_2m_min[0];
+    if(cur==null||mx==null||mn==null)return;
     const f=v=>`${Math.round(v)}°`;
     const icon=weatherIcon(d.current&&d.current.weather_code);
-    document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· Máx ${f(reg.max)} · Mín ${f(reg.min)}</span>`;
+    document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· Máx ${f(mx)} · Mín ${f(mn)}</span>`;
   }catch(e){}
 }
 // Máx/mín REALES de ayer: del archivo ERA5 (observaciones). Si aún no está disponible, usa el modelo del día pasado.

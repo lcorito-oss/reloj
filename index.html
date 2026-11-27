@@ -378,6 +378,7 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
             <div><span>Iluminación</span><strong id="moon-illumination">—%</strong></div>
             <div><span>Edad lunar</span><strong id="moon-age">—</strong></div>
             <div><span>Fase</span><strong id="moon-trend">—</strong></div>
+            <div><span>Temperatura</span><strong id="moon-temp">—</strong></div>
           </div>
           <div class="moon-meter" id="moon-meter" role="meter" aria-label="Iluminación lunar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Calculando"><span id="moon-meter-fill"></span><i id="moon-meter-dark"></i></div>
         </div>
@@ -1504,6 +1505,32 @@ function updateMoonPhase(){
   if(waxing){mFill.style.left='auto';mFill.style.right='0';mFill.style.width=`${illumination}%`;mFill.style.background='linear-gradient(90deg,#9aa9c2,#f4f2e9)';mDark.style.left='0';mDark.style.right='auto';mDark.style.width='0%';}
   else{mFill.style.left='0';mFill.style.right='auto';mFill.style.width='100%';mFill.style.background='linear-gradient(270deg,#9aa9c2,#f4f2e9)';mDark.style.left='auto';mDark.style.right='0';mDark.style.width=`${100-illumination}%`;}
 }
+// Temperatura de hoy (Open-Meteo, gratis y sin clave) para San Francisco del Oro: actual, máxima y mínima, con icono del cielo. Si no hay internet, queda en "—".
+function weatherIcon(code){
+  if(code==null)return '';
+  if(code===0)return alturaSol(Date.now())<0?'🌙':'☀️';
+  if(code===1||code===2)return '🌤️';
+  if(code===3)return '☁️';
+  if(code===45||code===48)return '🌫️';
+  if(code>=51&&code<=57)return '🌦️';
+  if((code>=61&&code<=67)||(code>=80&&code<=82))return '🌧️';
+  if((code>=71&&code<=77)||code===85||code===86)return '🌨️';
+  if(code>=95)return '⛈️';
+  return '';
+}
+async function updateWeather(){
+  try{
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${SKY_LAT}&longitude=${SKY_LON}&daily=temperature_2m_max,temperature_2m_min&current=temperature_2m,weather_code&timezone=America%2FChihuahua&forecast_days=1`;
+    const r=await fetch(url);
+    if(!r.ok)return;
+    const d=await r.json();
+    const cur=d.current&&d.current.temperature_2m, mx=d.daily&&d.daily.temperature_2m_max&&d.daily.temperature_2m_max[0], mn=d.daily&&d.daily.temperature_2m_min&&d.daily.temperature_2m_min[0];
+    if(cur==null||mx==null||mn==null)return;
+    const f=v=>`${Math.round(v)}°`;
+    const icon=weatherIcon(d.current&&d.current.weather_code);
+    document.getElementById('moon-temp').textContent=`${icon?icon+' ':''}${f(cur)} · Máx ${f(mx)} · Mín ${f(mn)}`;
+  }catch(e){}
+}
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
 const THEMES = [
   {"d":"#ff3b5c","m":"#4da3ff","w":"#3ddc84","g":"#4da3ff"},
@@ -1633,7 +1660,7 @@ setInterval(()=>{
   const faltan=TOTAL_ESTRELLAS-g.children.length;
   for(let i=0;i<Math.min(faltan,5);i++)nacerEstrella(false);
 },1000);
-applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();dibujarPolvoReloj();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);tick();play();
+applyTheme(neonTheme());setCalendar();updateText();updateMoonPhase();updateWeather();dibujarPolvoReloj();setInterval(setCalendar,30000);setInterval(updateText,60*1000);setInterval(updateMoonPhase,30*60*1000);setInterval(updateWeather,30*60*1000);tick();play();
 let touchIntro=false,lastPointerType='';
 svg.addEventListener('pointerdown',e=>{lastPointerType=e.pointerType;});
 svg.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'&&!RM&&!svg.classList.contains('go'))hoverOn();});

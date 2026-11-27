@@ -186,8 +186,9 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 .moon-place{margin-top:3px;color:#78869c;font-size:.75rem}
 .moon-stats{display:grid;gap:7px;margin-top:16px}
 .moon-stats div{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9ba8bc;font-size:.82rem}
-.moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums}
+.moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums;text-align:right}
 .moon-stats .temp-mm{font-size:.8em}
+.moon-stats .temp-nb{white-space:nowrap}
 .moon-stats .temp-freeze{color:#82c8ff}
 .moon-stats .temp-hot{color:#ff7a7a}
 @media(max-width:700px){
@@ -1546,8 +1547,8 @@ async function updateWeather(){
     if(mx==null||mn==null)return;
     const f=v=>`${Math.round(v)}°`;
     const icon=weatherIcon(d.current&&d.current.weather_code);
-    const maxHtml=mx>=TEMP_CALOR?`<span class="temp-hot">Máx ${f(mx)}</span>`:`Máx ${f(mx)}`;
-    const minHtml=mn<0?`<span class="temp-freeze">Mín ${f(mn)}</span>`:`Mín ${f(mn)}`;
+    const maxHtml=`<span class="temp-nb${mx>=TEMP_CALOR?' temp-hot':''}">Máx ${f(mx)}</span>`;
+    const minHtml=`<span class="temp-nb${mn<0?' temp-freeze':''}">Mín ${f(mn)}</span>`;
     document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· ${maxHtml} · ${minHtml}</span>`;
   }catch(e){}
 }
@@ -1569,8 +1570,8 @@ async function updateAyer(){
     }
     if(mx==null||mn==null)return;
     const g=v=>`${Math.round(v)}°`;
-    const maxHtml=mx>=TEMP_CALOR?`<span class="temp-hot">Máx ${g(mx)}</span>`:`Máx ${g(mx)}`;
-    const minHtml=mn<0?`<span class="temp-freeze">Mín ${g(mn)}</span>`:`Mín ${g(mn)}`;
+    const maxHtml=`<span class="temp-nb${mx>=TEMP_CALOR?' temp-hot':''}">Máx ${g(mx)}</span>`;
+    const minHtml=`<span class="temp-nb${mn<0?' temp-freeze':''}">Mín ${g(mn)}</span>`;
     document.getElementById('moon-temp-ayer').innerHTML=`<span class="temp-mm">${maxHtml} · ${minHtml}</span>`;
   }catch(e){}
 }

@@ -189,6 +189,7 @@ body::before{content:"";position:fixed;background:radial-gradient(circle at 12% 
 .moon-stats strong{color:#eef1f7;font-size:.88rem;font-weight:550;font-variant-numeric:tabular-nums}
 .moon-stats .temp-mm{font-size:.8em}
 .moon-stats .temp-freeze{color:#82c8ff}
+.moon-stats .temp-hot{color:#ff7a7a}
 @media(max-width:700px){
   .moon-card{grid-template-columns:minmax(96px,.55fr) minmax(0,1.45fr);gap:13px;margin-top:18px;padding:16px}
   .moon-symbol{width:min(100%,142px)}
@@ -1521,6 +1522,7 @@ function weatherIcon(code){
   if(code>=95)return '⛈️';
   return '';
 }
+const TEMP_CALOR=30; // a partir de aquí la máxima se pinta de rojo
 // Temperatura de hoy (Open-Meteo): actual + máx/mín REALES de lo que va del día,
 // de las horas ya pasadas. Si no hay horas pasadas, usa el pronóstico del día.
 async function updateWeather(){
@@ -1544,8 +1546,9 @@ async function updateWeather(){
     if(mx==null||mn==null)return;
     const f=v=>`${Math.round(v)}°`;
     const icon=weatherIcon(d.current&&d.current.weather_code);
+    const maxHtml=mx>=TEMP_CALOR?`<span class="temp-hot">Máx ${f(mx)}</span>`:`Máx ${f(mx)}`;
     const minHtml=mn<0?`<span class="temp-freeze">Mín ${f(mn)}</span>`:`Mín ${f(mn)}`;
-    document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· Máx ${f(mx)} · ${minHtml}</span>`;
+    document.getElementById('moon-temp').innerHTML=`${icon?icon+' ':''}${f(cur)} <span class="temp-mm">· ${maxHtml} · ${minHtml}</span>`;
   }catch(e){}
 }
 // Máx/mín REALES de ayer: del archivo ERA5 (observaciones). Si aún no está disponible, usa el modelo del día pasado.
@@ -1566,8 +1569,9 @@ async function updateAyer(){
     }
     if(mx==null||mn==null)return;
     const g=v=>`${Math.round(v)}°`;
+    const maxHtml=mx>=TEMP_CALOR?`<span class="temp-hot">Máx ${g(mx)}</span>`:`Máx ${g(mx)}`;
     const minHtml=mn<0?`<span class="temp-freeze">Mín ${g(mn)}</span>`:`Mín ${g(mn)}`;
-    document.getElementById('moon-temp-ayer').innerHTML=`<span class="temp-mm">Máx ${g(mx)} · ${minHtml}</span>`;
+    document.getElementById('moon-temp-ayer').innerHTML=`<span class="temp-mm">${maxHtml} · ${minHtml}</span>`;
   }catch(e){}
 }
 function tickSound(){if(!ac)return;const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime;o.type='square';o.frequency.value=lastS%2?1400:1100;g.gain.setValueAtTime(.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+.04);o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.05);}
